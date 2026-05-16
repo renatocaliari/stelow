@@ -1,6 +1,6 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
-import { join, basename, dirname } from "node:path";
+import { join, basename, dirname, extname } from "node:path";
 
 const WORKFLOW_DIR = "product-workflow";
 const TRACKING_FILE = "cali-product-workflow.json";
@@ -8,6 +8,14 @@ const GLOBAL_TRACKING_FILE = ".cali-product-workflow-global.json";
 const SCHEMA_URL = "https://raw.githubusercontent.com/renatocaliari/pi-product-workflow/main/cali-product-workflow.schema.json";
 
 const PHASE_NAMES = ["Clarify", "Shape", "Bet", "Build", "Critique", "Gate"];
+
+// Shared state for input parsing
+interface ParsedInput {
+  sources: string[];
+  draftText: string;
+}
+
+const parsedInputStore: Map<string, ParsedInput> = new Map();
 
 interface Phase {
   id: string;
@@ -21,13 +29,14 @@ interface Workflow {
   slug: string;
   name: string;
   description: string;
-  source?: string;  // Reference to source document/file
+  draftContent?: string;
+  source?: string;
   status: string;
   currentPhase: number;
   phases: Phase[];
   created: string;
   updated: string;
-  cwd?: string;    // Project path for cross-folder discovery
+  cwd?: string;
 }
 
 interface TrackingData {
@@ -38,6 +47,45 @@ interface TrackingData {
   workflows: Workflow[];
 }
 
+// ============ INPUT PARSING ============
+
+// Regex to match @filename references (with optional line numbers)
+const FILE_REF_REGEX = /@[\w\-\/\.]+(?::\d+(?::\d+)?)?/g;
+
+function parseInputForWorkflow(input: string): { sources: string[], draftText: string } {
+  const sources: string[] = [];
+  let draftText = "";
+  
+  // Extract @filename references
+  const matches = input.match(FILE_REF_REGEX);
+  if (matches) {
+    for (const match of matches) {
+      // Remove @ and any line numbers
+      let filePath = match.slice(1).split(':')[0];
+      
+      // Handle paths starting with ./ or /
+      if (!filePath.startsWith('./') && !filePath.startsWith('/')) {
+        filePath = './' + filePath;
+      }
+      
+      sources.push(filePath);
+    }
+  }
+  
+  // Extract text after the command (strip @filename refs and command itself)
+  // Remove @filenames and any key=value pairs
+  let text = input
+    .replace(FILE_REF_REGEX, ' ')
+    .replace(/\/[a-z-]+(\s|$)/gi, ' ')  // Remove command name
+    .replace(/[a-z]+=[^\s]+/gi, ' ')    // Remove key=value pairs
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  draftText = text;
+  
+  return { sources, draftText };
+}
+
 // ============ STATE MANAGEMENT ============
 
 function getTrackingPath(cwd: string): string {
@@ -45,7 +93,6 @@ function getTrackingPath(cwd: string): string {
 }
 
 function getGlobalTrackingPath(cwd: string): string {
-  // Global tracking in home directory
   const home = process.env.HOME || dirname(cwd);
   return join(home, GLOBAL_TRACKING_FILE);
 }
@@ -92,10 +139,6 @@ function getActiveWorkflowGlobal(): Workflow | null {
   return tracking.workflows.find(w => w.status === "in-progress") || null;
 }
 
-function getPhaseIndex(phaseId: string): number {
-  return PHASE_NAMES.findIndex(p => phaseId.toLowerCase().includes(p.toLowerCase()));
-}
-
 function generateSlug(): string {
   const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const random = Math.random().toString(36).substring(2, 6);
@@ -103,6 +146,11 @@ function generateSlug(): string {
 }
 
 function readSourceFile(sourcePath: string): string | null {
+  // Handle paths with ./ or without
+  if (!sourcePath.startsWith('./') && !sourcePath.startsWith('/')) {
+    sourcePath = './' + sourcePath;
+  }
+  
   if (!existsSync(sourcePath)) return null;
   
   try {
@@ -110,7 +158,7 @@ function readSourceFile(sourcePath: string): string | null {
     if (stat.isDirectory()) {
       return `Directory: ${sourcePath}`;
     }
-    return readFileSync(sourcePath, "utf-8").slice(0, 10000); // Limit to 10KB
+    return readFileSync(sourcePath, "utf-8").slice(0, 50000); // Limit to 50KB
   } catch {
     return null;
   }
@@ -136,7 +184,6 @@ function getProgressBar(workflow: Workflow, theme: any): string[] {
     ""
   ];
   
-  // Phase indicators
   const phaseLine = PHASE_NAMES.map((name, i) => {
     if (i < workflow.currentPhase) {
       return theme.fg("success", "●") + " " + theme.fg("muted", name);
@@ -185,22 +232,59 @@ function notifyPhaseChange(ctx: ExtensionContext, workflow: Workflow, oldPhase: 
   }
 }
 
+function truncateText(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen - 100) + "\n\n[... " + (text.length - maxLen) + " more characters truncated ...]";
+}
+
 // ============ COMMANDS ============
 
 function registerCommands(pi: ExtensionAPI): void {
   
   // /workflow-start - Start a new workflow
   pi.registerCommand("workflow-start", {
-    description: "Start a new product workflow. Creates workflow in current project. Auto-generates slug if not provided. Optional: name, description, source file path.",
+    description: "Start a new product workflow. Auto-generates slug if not provided. Parses @filename references as source files and trailing text as draft content.",
     handler: async (args, ctx) => {
-      // Generate slug if not provided
+      // Get parsed input from input event
+      const sessionId = ctx.sessionId || "default";
+      const parsed = parsedInputStore.get(sessionId) || { sources: [], draftText: "" };
+      
+      // Determine parameters (args override parsed input)
       let slug = args?.slug;
+      const name = args?.name;
+      const description = args?.description;
+      const sources = args?.source ? [args.source] : parsed.sources;
+      const draftText = args?.description || parsed.draftText;
+      
+      // Generate slug if not provided
       if (!slug) {
-        slug = generateSlug();
+        // Try to generate from description/draft
+        if (draftText && draftText.length > 3) {
+          slug = draftText.toLowerCase()
+            .replace(/[^a-z0-9\s]/g, ' ')
+            .trim()
+            .split(/\s+/)
+            .slice(0, 3)
+            .join('-');
+          // Clean up and limit length
+          slug = slug.replace(/[^a-z0-9-]/g, '').slice(0, 40);
+          if (slug.length < 3) {
+            slug = generateSlug();
+          }
+        } else if (sources.length > 0) {
+          // Use first source filename as slug base
+          const srcName = basename(sources[0], extname(sources[0]));
+          slug = srcName.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 40);
+          if (slug.length < 3) {
+            slug = generateSlug();
+          }
+        } else {
+          slug = generateSlug();
+        }
       }
       
-      // Normalize slug (replace spaces/special chars)
-      slug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+      // Normalize slug
+      slug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
       
       let tracking = readTracking(ctx.cwd);
       if (!tracking) {
@@ -218,18 +302,31 @@ function registerCommands(pi: ExtensionAPI): void {
         return `Workflow '${slug}' already exists.\nUse /workflow-status to see it.`;
       }
       
-      // Read source file if provided
-      let sourceContent: string | undefined;
-      if (args?.source) {
-        sourceContent = readSourceFile(args.source);
+      // Read source files content
+      let allSourceContent = "";
+      for (const src of sources) {
+        const content = readSourceFile(src);
+        if (content) {
+          allSourceContent += `\n\n=== FILE: ${src} ===\n${content}\n`;
+        }
       }
       
-      // Create new workflow
+      // Combine draft text with source content
+      let fullDraft = "";
+      if (draftText) {
+        fullDraft = `### Initial Draft\n\n${draftText}\n\n`;
+      }
+      if (allSourceContent) {
+        fullDraft += allSourceContent;
+      }
+      
+      // Create workflow
       const workflow: Workflow = {
         slug,
-        name: args?.name || slug,
-        description: args?.description || (sourceContent ? "See source file" : ""),
-        source: args?.source,
+        name: name || slug,
+        description: truncateText(draftText, 500) || "",
+        draftContent: fullDraft ? truncateText(fullDraft, 5000) : undefined,
+        source: sources.length > 0 ? sources[0] : undefined,
         status: "in-progress",
         currentPhase: 0,
         phases: PHASE_NAMES.map((name, i) => ({
@@ -245,7 +342,7 @@ function registerCommands(pi: ExtensionAPI): void {
       tracking.workflows.push(workflow);
       writeTracking(ctx.cwd, tracking);
       
-      // Also update global tracking
+      // Update global tracking
       const globalTracking = readGlobalTracking() || {
         "$schema": SCHEMA_URL,
         "version": "1.0",
@@ -259,21 +356,31 @@ function registerCommands(pi: ExtensionAPI): void {
       // Update UI
       updateWorkflowUI(ctx, ctx.cwd);
       
-      // Read source content summary if available
-      let sourceInfo = "";
-      if (sourceContent) {
-        const preview = sourceContent.slice(0, 500);
-        sourceInfo = `\n\n📄 Source: ${args.source}\nPreview:\n\`\`\`\n${preview}...\n\`\`\``;
-      }
+      // Clear parsed input
+      parsedInputStore.delete(sessionId);
       
-      return [
+      // Build response
+      const lines: string[] = [
         `✅ Workflow '${slug}' started!`,
         `Current phase: ${PHASE_NAMES[0]}`,
-        `Project: ${ctx.cwd}`,
-        sourceInfo,
-        "",
-        `Run /skill:cali-product-workflow to begin planning.`
-      ].join("\n");
+        `Project: ${ctx.cwd}`
+      ];
+      
+      if (sources.length > 0) {
+        lines.push(`📎 Sources: ${sources.join(', ')}`);
+      }
+      
+      if (draftText) {
+        lines.push(`\n📝 Draft:\n${draftText.slice(0, 300)}${draftText.length > 300 ? '...' : ''}`);
+      }
+      
+      if (allSourceContent) {
+        lines.push(`\n📄 Source content loaded (${allSourceContent.length} chars from ${sources.length} file(s))`);
+      }
+      
+      lines.push("", `Run /skill:cali-product-workflow to begin planning.`);
+      
+      return lines.join("\n");
     }
   });
   
@@ -283,10 +390,8 @@ function registerCommands(pi: ExtensionAPI): void {
     handler: async (args, ctx) => {
       const workflow = getActiveWorkflow(ctx.cwd);
       if (!workflow) {
-        // Try global
         const global = getActiveWorkflowGlobal();
         if (global) {
-          // Remove from global
           const globalTracking = readGlobalTracking();
           if (globalTracking) {
             globalTracking.workflows = globalTracking.workflows.filter(w => w.slug !== global.slug);
@@ -300,18 +405,15 @@ function registerCommands(pi: ExtensionAPI): void {
         return "No active workflow to stop.";
       }
       
-      // Clear UI immediately
       ctx.ui.setStatus("workflow", undefined);
       ctx.ui.setWidget("workflow-progress", undefined);
       
-      // Update tracking - remove workflow
       const tracking = readTracking(ctx.cwd);
       if (tracking) {
         tracking.workflows = tracking.workflows.filter(w => w.slug !== workflow.slug);
         writeTracking(ctx.cwd, tracking);
       }
       
-      // Also remove from global
       const globalTracking = readGlobalTracking();
       if (globalTracking) {
         globalTracking.workflows = globalTracking.workflows.filter(w => w.slug !== workflow.slug);
@@ -328,7 +430,7 @@ function registerCommands(pi: ExtensionAPI): void {
     }
   });
   
-  // /workflow-pause - Pause the workflow (keep state)
+  // /workflow-pause - Pause the workflow
   pi.registerCommand("workflow-pause", {
     description: "Pause the active workflow (keeps state for later).",
     handler: async (args, ctx) => {
@@ -346,7 +448,6 @@ function registerCommands(pi: ExtensionAPI): void {
         }
       }
       
-      // Update global
       const globalTracking = readGlobalTracking();
       if (globalTracking) {
         const idx = globalTracking.workflows.findIndex(w => w.slug === workflow.slug);
@@ -377,7 +478,6 @@ function registerCommands(pi: ExtensionAPI): void {
       const tracking = readTracking(ctx.cwd);
       const globalTracking = readGlobalTracking();
       
-      // Find paused workflow in current project or global
       let paused = tracking?.workflows.find(w => w.status === "paused");
       if (!paused && globalTracking) {
         paused = globalTracking.workflows.find(w => w.status === "paused");
@@ -403,7 +503,6 @@ function registerCommands(pi: ExtensionAPI): void {
         return `Paused workflow '${slug || "unknown"}' not found.`;
       }
       
-      // Resume in current project
       if (tracking) {
         const idx = tracking.workflows.findIndex(w => w.slug === target.slug);
         if (idx !== -1) {
@@ -412,7 +511,6 @@ function registerCommands(pi: ExtensionAPI): void {
         }
       }
       
-      // Update global
       if (globalTracking) {
         const idx = globalTracking.workflows.findIndex(w => w.slug === target.slug);
         if (idx !== -1) {
@@ -421,7 +519,6 @@ function registerCommands(pi: ExtensionAPI): void {
         }
       }
       
-      // Update UI
       updateWorkflowUI(ctx, ctx.cwd);
       
       return [
@@ -439,10 +536,8 @@ function registerCommands(pi: ExtensionAPI): void {
       const workflow = getActiveWorkflow(ctx.cwd);
       
       if (!workflow) {
-        // Check global
         const global = getActiveWorkflowGlobal();
         if (global) {
-          const pct = Math.round(((global.currentPhase + 1) / PHASE_NAMES.length) * 100);
           return [
             `📍 Global workflow: ${global.slug}`,
             `Phase: ${global.currentPhase + 1}/${PHASE_NAMES.length} — ${PHASE_NAMES[global.currentPhase]}`,
@@ -457,9 +552,10 @@ function registerCommands(pi: ExtensionAPI): void {
           "No active workflow in this project.",
           "",
           "Start one with:",
-          "  /workflow-start slug=my-feature",
-          "  /workflow-start slug=my-feature name='My Feature' description='What we want to build'",
-          "  /workflow-start source=./brief.md  (auto-generates slug)",
+          "  /workflow-start",
+          "  /workflow-start @brief.md",
+          "  /workflow-start @doc.md \"extra context here\"",
+          "  /workflow-start slug=my-feature source=./brief.md",
           "",
           "Or check /workflow-list for other workflows."
         ].join("\n");
@@ -470,22 +566,34 @@ function registerCommands(pi: ExtensionAPI): void {
       const filled = Math.round((pct / 100) * barLen);
       const bar = "█".repeat(filled) + "░".repeat(barLen - filled);
       
-      return [
+      const lines: string[] = [
         `📋 Workflow: ${workflow.slug}`,
-        workflow.name !== workflow.slug ? `Name: ${workflow.name}` : "",
         `Progress: [${bar}] ${pct}%`,
         `Phase: ${workflow.currentPhase + 1}/${PHASE_NAMES.length} — ${PHASE_NAMES[workflow.currentPhase]}`,
-        workflow.source ? `Source: ${workflow.source}` : "",
-        workflow.description ? `Description: ${workflow.description}` : "",
-        "",
-        "Phases:",
-        ...workflow.phases.map((p, i) => {
-          const icon = p.status === "completed" ? "✅" : 
-                       p.status === "in-progress" ? "🔄" : "⬜";
-          const prefix = i === workflow.currentPhase ? "▶ " : "  ";
-          return `${prefix}${icon} ${i + 1}. ${p.name}`;
-        })
-      ].filter(Boolean).join("\n");
+      ];
+      
+      if (workflow.name !== workflow.slug) {
+        lines.push(`Name: ${workflow.name}`);
+      }
+      
+      if (workflow.source) {
+        lines.push(`Source: ${workflow.source}`);
+      }
+      
+      if (workflow.draftContent) {
+        lines.push("", `Draft Preview:`);
+        lines.push(workflow.draftContent.slice(0, 500) + (workflow.draftContent.length > 500 ? '...' : ''));
+      }
+      
+      lines.push("", "Phases:");
+      workflow.phases.forEach((p, i) => {
+        const icon = p.status === "completed" ? "✅" : 
+                     p.status === "in-progress" ? "🔄" : "⬜";
+        const prefix = i === workflow.currentPhase ? "▶ " : "  ";
+        lines.push(`${prefix}${icon} ${i + 1}. ${p.name}`);
+      });
+      
+      return lines.join("\n");
     }
   });
   
@@ -495,7 +603,6 @@ function registerCommands(pi: ExtensionAPI): void {
     handler: async (args, ctx) => {
       const lines: string[] = [];
       
-      // Current project
       const tracking = readTracking(ctx.cwd);
       if (tracking && tracking.workflows.length > 0) {
         lines.push("📁 Current Project:");
@@ -508,10 +615,8 @@ function registerCommands(pi: ExtensionAPI): void {
         lines.push("");
       }
       
-      // Global
       const globalTracking = readGlobalTracking();
       if (globalTracking && globalTracking.workflows.length > 0) {
-        // Filter out ones already in current project
         const globalOnly = globalTracking.workflows.filter(w => 
           !tracking?.workflows.some(tw => tw.slug === w.slug)
         );
@@ -570,7 +675,6 @@ function registerCommands(pi: ExtensionAPI): void {
       
       const oldPhase = workflow.currentPhase;
       
-      // Update local tracking
       const tracking = readTracking(ctx.cwd);
       if (tracking) {
         const idx = tracking.workflows.findIndex(w => w.slug === workflow.slug);
@@ -588,7 +692,6 @@ function registerCommands(pi: ExtensionAPI): void {
         }
       }
       
-      // Update global tracking
       const globalTracking = readGlobalTracking();
       if (globalTracking) {
         const idx = globalTracking.workflows.findIndex(w => w.slug === workflow.slug);
@@ -598,10 +701,8 @@ function registerCommands(pi: ExtensionAPI): void {
         }
       }
       
-      // Update UI
       updateWorkflowUI(ctx, ctx.cwd);
       
-      // Notify if changed
       if (oldPhase !== phase) {
         notifyPhaseChange(ctx, workflow, oldPhase);
       }
@@ -631,7 +732,6 @@ function registerCommands(pi: ExtensionAPI): void {
         ].join("\n");
       }
       
-      // Call setphase
       const tracking = readTracking(ctx.cwd);
       if (tracking) {
         const idx = tracking.workflows.findIndex(w => w.slug === workflow.slug);
@@ -648,7 +748,6 @@ function registerCommands(pi: ExtensionAPI): void {
         }
       }
       
-      // Update global
       const globalTracking = readGlobalTracking();
       if (globalTracking) {
         const idx = globalTracking.workflows.findIndex(w => w.slug === workflow.slug);
@@ -677,11 +776,9 @@ function registerCommands(pi: ExtensionAPI): void {
         return "No active workflow to complete.";
       }
       
-      // Clear UI
       ctx.ui.setStatus("workflow", undefined);
       ctx.ui.setWidget("workflow-progress", undefined);
       
-      // Update tracking
       const tracking = readTracking(ctx.cwd);
       if (tracking) {
         const idx = tracking.workflows.findIndex(w => w.slug === workflow.slug);
@@ -692,7 +789,6 @@ function registerCommands(pi: ExtensionAPI): void {
         }
       }
       
-      // Update global
       const globalTracking = readGlobalTracking();
       if (globalTracking) {
         const idx = globalTracking.workflows.findIndex(w => w.slug === workflow.slug);
@@ -753,14 +849,24 @@ function registerCommands(pi: ExtensionAPI): void {
 
 export default function (pi: ExtensionAPI) {
   
+  // 0. Parse input for @filename refs and draft text
+  pi.on("input", async (event, ctx) => {
+    if (!event.text.startsWith("/workflow-start")) return;
+    
+    const sessionId = ctx.sessionId || "default";
+    const parsed = parseInputForWorkflow(event.text);
+    
+    if (parsed.sources.length > 0 || parsed.draftText) {
+      parsedInputStore.set(sessionId, parsed);
+    }
+  });
+  
   // 1. Scaffolding on session_start
   pi.on("session_start", async (_event, ctx) => {
-    // Create workflow directory
     const workflowPath = join(ctx.cwd, WORKFLOW_DIR);
     mkdirSync(workflowPath, { recursive: true });
     
-    // Create tracking file if not exists
-    const trackingPath = join(ctx.cwd, TRACKING_FILE);
+    const trackingPath = getTrackingPath(ctx.cwd);
     if (!existsSync(trackingPath)) {
       const template: TrackingData = {
         "$schema": SCHEMA_URL,
@@ -772,10 +878,8 @@ export default function (pi: ExtensionAPI) {
       writeFileSync(trackingPath, JSON.stringify(template, null, 2));
     }
     
-    // Register commands
     registerCommands(pi);
     
-    // Restore UI state if there's an active workflow
     if (ctx.ui) {
       updateWorkflowUI(ctx, ctx.cwd);
       
@@ -786,14 +890,12 @@ export default function (pi: ExtensionAPI) {
           "info"
         );
       } else {
-        // Check global for workflows in this project
         const globalTracking = readGlobalTracking();
         if (globalTracking) {
           const projectWorkflow = globalTracking.workflows.find(w => 
             w.cwd === ctx.cwd && w.status !== "completed"
           );
           if (projectWorkflow) {
-            // Move to local tracking
             const tracking = readTracking(ctx.cwd);
             if (tracking && !tracking.workflows.some(w => w.slug === projectWorkflow.slug)) {
               tracking.workflows.push(projectWorkflow);
@@ -811,12 +913,11 @@ export default function (pi: ExtensionAPI) {
     }
   });
   
-  // 2. Track phase changes during agent turns
+  // 2. Track phase changes
   pi.on("turn_end", async (_event, ctx) => {
     const workflow = getActiveWorkflow(ctx.cwd);
     if (!workflow || !ctx.ui) return;
     
-    // Check if phase should advance based on tracking file
     const tracking = readTracking(ctx.cwd);
     if (tracking) {
       const current = tracking.workflows.find(w => w.slug === workflow.slug);
@@ -829,14 +930,7 @@ export default function (pi: ExtensionAPI) {
     }
   });
   
-  // 3. Clear UI on session shutdown
-  pi.on("session_shutdown", async (_event, ctx) => {
-    if (ctx.ui) {
-      // Don't clear - let UI persist for next session in same project
-    }
-  });
-  
-  // 4. Listen for agent_end to check if workflow should update
+  // 3. Update on agent_end
   pi.on("agent_end", async (_event, ctx) => {
     if (!ctx.ui) return;
     
