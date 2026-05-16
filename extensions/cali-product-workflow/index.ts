@@ -286,6 +286,36 @@ function registerCommands(pi: ExtensionAPI): void {
       tracking.workflows.push(workflow);
       writeTracking(ctx.cwd, tracking);
       
+      // Create proper workflow directory structure for skill auto-detection
+      const dateStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      const workflowDir = join(ctx.cwd, WORKFLOW_DIR, dateStr, slug);
+      mkdirSync(workflowDir, { recursive: true });
+      mkdirSync(join(workflowDir, "specs"), { recursive: true });
+      mkdirSync(join(workflowDir, "interfaces"), { recursive: true });
+      mkdirSync(join(workflowDir, "plans"), { recursive: true });
+      mkdirSync(join(workflowDir, "plans", "scopes"), { recursive: true });
+      mkdirSync(join(workflowDir, "critiques"), { recursive: true });
+      mkdirSync(join(workflowDir, "approvals"), { recursive: true });
+      mkdirSync(join(workflowDir, "sessions"), { recursive: true });
+      
+      // Create index.json for skill auto-discovery
+      const indexPath = join(workflowDir, "index.json");
+      const indexData = {
+        version: "1.0",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        slug,
+        workflow_status: "in-progress",
+        current_phase: "clarify",
+        current_phase_index: 0,
+        artifacts: {},
+        approved: false,
+        approved_at: null,
+        draft: fullDraft ? truncateText(fullDraft, 10000) : undefined,
+        sources
+      };
+      writeFileSync(indexPath, JSON.stringify(indexData, null, 2));
+      
       const globalTracking = readGlobalTracking() || { "$schema": SCHEMA_URL, "version": "1.0", "created": new Date().toISOString(), "updated": new Date().toISOString(), "workflows": [] };
       globalTracking.workflows.push(workflow);
       writeGlobalTracking(globalTracking);
@@ -297,7 +327,15 @@ function registerCommands(pi: ExtensionAPI): void {
       if (sources.length > 0) lines.push(`📎 Sources: ${sources.join(', ')}`);
       if (draftText) lines.push(`\n📝 Draft:\n${draftText.slice(0, 300)}${draftText.length > 300 ? '...' : ''}`);
       if (allSourceContent) lines.push(`\n📄 Source content loaded`);
-      lines.push("", `Run /skill:cali-product-workflow to begin.`);
+      lines.push("");
+      lines.push("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      lines.push("📋 NEXT STEP REQUIRED:");
+      lines.push("");
+      lines.push("  Type: /skill:cali-product-workflow");
+      lines.push("");
+      lines.push("  This will start Phase 1 (Shape Up) and ask you");
+      lines.push("  the clarifying questions before planning.");
+      lines.push("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       
       return lines.join("\n");
     }
