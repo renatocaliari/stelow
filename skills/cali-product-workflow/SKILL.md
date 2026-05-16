@@ -351,10 +351,6 @@ Recomendo: [justificativa com base no contexto do projeto].`,
         label: "Short-Cycle Product",
         description: "Validação rápida de ideias com ciclos curtos de aprendizado. Ideal para hypotheses não validadas."
       },
-      {
-        label: "Nenhuma — seguir direto",
-        description: "Pular exploração estratégica e ir para Shape Up."
-      }
     ]
   }]
 })
@@ -365,7 +361,7 @@ Recomendo: [justificativa com base no contexto do projeto].`,
 2. Execute as selecionadas (podem rodar em paralelo via subagent)
 3. Incorpore os outputs como insumo do Shape Up
 
-**Se selecionar "Nenhuma" (ou não selecionar nada):** prossiga direto para Fase 1.
+**Se não selecionar nada:** prossiga direto para Fase 1.
 
 ### Regras de encadeamento automático
 
@@ -507,23 +503,23 @@ Justificativa: [1-2 frases].`,
       },
       {
         label: "A — Proposta A",
-        description: "[descrição resumida do arquétipo A]"
+        description: "{resumo da proposta A: 1-2 frases com a abordagem principal}"
       },
       {
         label: "B — Proposta B",
-        description: "[descrição resumida do arquétipo B]"
+        description: "{resumo da proposta B}"
       },
       {
         label: "C — Proposta C",
-        description: "[descrição resumida do arquétipo C]"
+        description: "{resumo da proposta C}"
       },
       {
         label: "D — Proposta D",
-        description: "[descrição resumida do arquétipo D]"
+        description: "{resumo da proposta D}"
       },
       {
         label: "E — Proposta E",
-        description: "[descrição resumida do arquétipo E]"
+        description: "{resumo da proposta E}"
       }
     ]
   }]
