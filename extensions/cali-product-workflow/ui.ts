@@ -9,7 +9,8 @@ import { PHASE_NAMES, PHASE_HINTS } from "./types";
 import {
   getActiveWorkflow, readTracking, writeTracking,
   readGlobalTracking, writeGlobalTracking,
-  getAllActiveWorkflows, renameWorkflow, suggestNameFromDraft
+  getAllActiveWorkflows, renameWorkflow, suggestNameFromDraft,
+  resolveProjectDir
 } from "./state";
 
 // =============================================================================
@@ -73,7 +74,8 @@ export function notifyPhase(ctx: ExtensionContext, wf: Workflow, oldPhase: numbe
 
 async function triggerAutoRename(ctx: ExtensionContext, currentName: string): Promise<void> {
   if (!currentName.startsWith("untitled-")) return;
-  const tracking = readTracking(ctx.cwd);
+  const wd = resolveProjectDir(ctx.cwd);
+  const tracking = readTracking(wd);
   if (!tracking) return;
   const wf = tracking.workflows.find(w => w.name === currentName);
   if (!wf || !wf.draftContent) return;
@@ -81,9 +83,9 @@ async function triggerAutoRename(ctx: ExtensionContext, currentName: string): Pr
   const suggestion = suggestNameFromDraft(wf.draftContent);
   if (!suggestion || suggestion.startsWith("untitled-")) return;
 
-  const result = renameWorkflow(ctx.cwd, currentName, suggestion);
+  const result = renameWorkflow(wd, currentName, suggestion);
   if (result.ok && ctx.ui) {
-    updateFooter(ctx, ctx.cwd);
+    updateFooter(ctx, wd);
     ctx.ui.notify(`✨ Workflow renamed to "${suggestion}"`, "success");
   }
 }

@@ -5,7 +5,7 @@ import { WORKFLOW_DIR, TRACKING_FILE, SCHEMA_URL } from "./types";
 import type { TrackingData } from "./types";
 import {
   parsedInputStore, readTracking, writeTracking,
-  readGlobalTracking, getActiveWorkflow,
+  readGlobalTracking, getActiveWorkflow, resolveProjectDir,
   parseInputForWorkflow
 } from "./state";
 import { updateFooter, notifyPhase } from "./ui";
@@ -29,9 +29,10 @@ export default function (pi: ExtensionAPI) {
 
   // ── Session start ✓ ──────────────────────────────────────────────
   pi.on("session_start", async (_event, ctx) => {
+    const wd = resolveProjectDir(ctx.cwd);
     // Scaffold
-    mkdirSync(join(ctx.cwd, WORKFLOW_DIR), { recursive: true });
-    const trackingPath = join(ctx.cwd, TRACKING_FILE);
+    mkdirSync(join(wd, WORKFLOW_DIR), { recursive: true });
+    const trackingPath = join(wd, TRACKING_FILE);
     if (!existsSync(trackingPath)) {
       writeFileSync(trackingPath, JSON.stringify({
         $schema: SCHEMA_URL, version: "1.0",
@@ -48,8 +49,8 @@ export default function (pi: ExtensionAPI) {
     if (!ctx.ui) return;
 
     // Restore active workflow UI
-    updateFooter(ctx, ctx.cwd);
-    const wf = getActiveWorkflow(ctx.cwd);
+    updateFooter(ctx, wd);
+    const wf = getActiveWorkflow(wd);
     if (wf) {
       ctx.ui.notify(`◆ ${wf.name} (${wf.currentPhase + 1}/${wf.phases.length})`, "info");
       return;
@@ -59,40 +60,42 @@ export default function (pi: ExtensionAPI) {
     const gt = readGlobalTracking();
     if (!gt) return;
     const projectWf = gt.workflows.find(
-      w => w.cwd === ctx.cwd && w.status !== "completed"
+      w => w.cwd === wd && w.status !== "completed"
     );
     if (!projectWf) return;
 
-    const tracking = readTracking(ctx.cwd);
+    const tracking = readTracking(wd);
     if (tracking && !tracking.workflows.some(w => w.name === projectWf.name)) {
       tracking.workflows.push(projectWf);
-      writeTracking(ctx.cwd, tracking);
+      writeTracking(wd, tracking);
     }
-    updateFooter(ctx, ctx.cwd);
+    updateFooter(ctx, wd);
     ctx.ui.notify(`◆ ${projectWf.name} (${projectWf.currentPhase + 1}/${projectWf.phases.length})`, "info");
   });
 
   // ── Tracking file writes ✓ ───────────────────────────────────────
   pi.on("tool_call", async (event, ctx) => {
     if (event.input?.path?.includes?.(TRACKING_FILE) && ctx.ui) {
-      const wf = getActiveWorkflow(ctx.cwd);
-      if (wf) updateFooter(ctx, ctx.cwd);
+      const wd = resolveProjectDir(ctx.cwd);
+      const wf = getActiveWorkflow(wd);
+      if (wf) updateFooter(ctx, wd);
     }
   });
 
   // ── Phase change detection ✓ ─────────────────────────────────────
   pi.on("turn_end", async (_event, ctx) => {
-    const wf = getActiveWorkflow(ctx.cwd);
+    const wd = resolveProjectDir(ctx.cwd);
+    const wf = getActiveWorkflow(wd);
     if (!wf || !ctx.ui) return;
 
-    const tracking = readTracking(ctx.cwd);
+    const tracking = readTracking(wd);
     if (!tracking) return;
 
     const current = tracking.workflows.find(w => w.name === wf.name);
     if (current && current.currentPhase !== wf.currentPhase) {
       const oldPhase = wf.currentPhase;
       wf.currentPhase = current.currentPhase;
-      updateFooter(ctx, ctx.cwd);
+      updateFooter(ctx, wd);
       notifyPhase(ctx, wf, oldPhase);
     }
   });
@@ -100,7 +103,8 @@ export default function (pi: ExtensionAPI) {
   // ── UI update on agent end ✓ ─────────────────────────────────────
   pi.on("agent_end", async (_event, ctx) => {
     if (!ctx.ui) return;
-    const wf = getActiveWorkflow(ctx.cwd);
-    if (wf) updateFooter(ctx, ctx.cwd);
+    const wd = resolveProjectDir(ctx.cwd);
+    const wf = getActiveWorkflow(wd);
+    if (wf) updateFooter(ctx, wd);
   });
 }

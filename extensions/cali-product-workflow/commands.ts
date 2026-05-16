@@ -7,7 +7,7 @@ import { WORKFLOW_DIR, PHASE_NAMES } from "./types";
 import {
   readTracking, writeTracking, readGlobalTracking, writeGlobalTracking,
   getActiveWorkflow, renameWorkflow, toSafeName, reconcileTracking, scanWorkflowDirs,
-  archiveWorkflowOnDisk
+  archiveWorkflowOnDisk, resolveProjectDir
 } from "./state";
 import { updateFooter, notifyPhase, showOverlay } from "./ui";
 import cmdStart from "./start";
@@ -84,10 +84,11 @@ function removeWorkflowFromTracking(cwd: string, workflowName: string): void {
 // ── STOP ─────────────────────────────────────────────────────────────
 
 function cmdStop(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
+  const wd = resolveProjectDir(ctx.cwd);
   const parsed = parseArgs(args);
 
   // Gather all workflows from: current dir reconcile + global tracking (same cwd)
-  const fromDisk = reconcileTracking(ctx.cwd);
+  const fromDisk = reconcileTracking(wd);
   const fromGlobal = readGlobalTracking()?.workflows
     .filter(w => !fromDisk.some(dw => dw.name === w.name)) ?? [];
   const allWfs = [...fromDisk, ...fromGlobal];
@@ -103,7 +104,7 @@ function cmdStop(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
   // ── /pw:stop all ───────────────────────────────────────────────
   if (parsed._.includes("all") || parsed.all !== undefined) {
     for (const w of stoppable) {
-      removeWorkflowFromTracking(ctx.cwd, w.name);
+      removeWorkflowFromTracking(wd, w.name);
     }
     ctx.ui?.notify(`❌ Stopped ${stoppable.length} workflow(s).`, "info");
     ctx.ui?.setStatus("workflow", undefined);
@@ -116,7 +117,7 @@ function cmdStop(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
     for (const wfName of parsed._) {
       const found = stoppable.find(w => w.name === wfName);
       if (found) {
-        removeWorkflowFromTracking(ctx.cwd, wfName);
+        removeWorkflowFromTracking(wd, wfName);
         count++;
       }
     }
@@ -124,7 +125,7 @@ function cmdStop(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
       replyWarn(ctx, `No workflow found matching: ${parsed._.join(", ")}`);
     } else {
       ctx.ui?.notify(`❌ Stopped ${count} workflow(s).`, "info");
-      if (stoppable.some(w => w.name === getActiveWorkflow(ctx.cwd)?.name)) {
+      if (stoppable.some(w => w.name === getActiveWorkflow(wd)?.name)) {
         ctx.ui?.setStatus("workflow", undefined);
       }
     }
@@ -134,14 +135,14 @@ function cmdStop(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
   // ── /pw:stop (no args) — picker se >1, direto se for 1 ──────
   if (stoppable.length === 1) {
     const wfName = stoppable[0].name;
-    removeWorkflowFromTracking(ctx.cwd, wfName);
+    removeWorkflowFromTracking(wd, wfName);
     ctx.ui?.notify(`❌ Workflow '${wfName}' stopped.`, "info");
     ctx.ui?.setStatus("workflow", undefined);
     return;
   }
 
   // Multiple workflows: show interactive picker
-  showStopPicker(ctx, ctx.cwd, stoppable);
+  showStopPicker(ctx, wd, stoppable);
 }
 
 function showStopPicker(
@@ -223,16 +224,17 @@ function showStopPicker(
 // ── PAUSE / RESUME ───────────────────────────────────────────────────
 
 function cmdPause(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
-  const wf = getActiveWorkflow(ctx.cwd);
+  const wd = resolveProjectDir(ctx.cwd);
+  const wf = getActiveWorkflow(wd);
   if (!wf) { noActive(ctx); return; }
 
-  const t = readTracking(ctx.cwd);
+  const t = readTracking(wd);
   if (t) {
     const idx = t.workflows.findIndex(w => w.name === wf.name);
     if (idx !== -1) {
       t.workflows[idx].status = "paused";
       t.workflows[idx].updated = new Date().toISOString();
-      writeTracking(ctx.cwd, t);
+      writeTracking(wd, t);
     }
   }
   const gt = readGlobalTracking();
@@ -247,9 +249,10 @@ function cmdPause(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
 }
 
 function cmdResume(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
+  const wd = resolveProjectDir(ctx.cwd);
   const parsed = parseArgs(args);
   const name = parsed.name || parsed._[0];
-  const t = readTracking(ctx.cwd);
+  const t = readTracking(wd);
   const gt = readGlobalTracking();
 
   const paused = name
@@ -267,7 +270,7 @@ function cmdResume(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
   if (t) {
     const idx = t.workflows.findIndex(w => w.name === paused.name);
     if (idx !== -1) t.workflows[idx].status = "in-progress";
-    writeTracking(ctx.cwd, t);
+    writeTracking(wd, t);
   }
   if (gt) {
     const idx = gt.workflows.findIndex(w => w.name === paused.name);
@@ -275,14 +278,15 @@ function cmdResume(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
     writeGlobalTracking(gt);
   }
 
-  updateFooter(ctx, ctx.cwd);
+  updateFooter(ctx, wd);
   reply(ctx, `▶️ '${paused.name}' resumed. Stage: ${PHASE_NAMES[paused.currentPhase]}`);
 }
 
 // ── STATUS ───────────────────────────────────────────────────────────
 
 function cmdStatus(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
-  const wf = getActiveWorkflow(ctx.cwd);
+  const wd = resolveProjectDir(ctx.cwd);
+  const wf = getActiveWorkflow(wd);
   if (!wf) {
     const g = readGlobalTracking()?.workflows.find(w => w.status === "in-progress");
     if (g) {
@@ -319,6 +323,7 @@ function cmdStatus(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
 // ── LIST ─────────────────────────────────────────────────────────────
 
 function cmdList(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
+  const wd = resolveProjectDir(ctx.cwd);
   const parsed = parseArgs(args);
   const lines: string[] = [];
 
@@ -359,9 +364,9 @@ function cmdList(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
     // Also scan product-workflow/ in known common dirs
     const homeDev = homedir() + "/Development";
     const candidates = [
-      ctx.cwd,
+      wd,
       homeDev,
-      ...Array.from(allProjects.keys()).filter(d => d !== "?" && d !== ctx.cwd && d !== homeDev),
+      ...Array.from(allProjects.keys()).filter(d => d !== "?" && d !== wd && d !== homeDev),
     ];
     const seen = new Set<string>();
     for (const dir of [...new Set(candidates)]) {
@@ -389,12 +394,12 @@ function cmdList(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
 
   // ── /pw:ls archived — show archived workflows from disk ───────
   if (parsed._.includes("archived") || parsed.archived !== undefined) {
-    const diskWfs = scanWorkflowDirs(ctx.cwd).filter(dw => dw.status === "archived");
+    const diskWfs = scanWorkflowDirs(wd).filter(dw => dw.status === "archived");
     if (diskWfs.length === 0) {
       replyWarn(ctx, "No archived workflows.");
       return;
     }
-    lines.push(`📁 ${ctx.cwd} (archived):`);
+    lines.push(`📁 ${wd} (archived):`);
     for (const dw of diskWfs) {
       lines.push(`  ○ ${dw.name}`);
     }
@@ -403,10 +408,10 @@ function cmdList(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
   }
 
   // ── /pw:ls (default) — current dir with disk reconciliation ────
-  const reconciled = reconcileTracking(ctx.cwd);
+  const reconciled = reconcileTracking(wd);
 
   if (reconciled.length > 0) {
-    lines.push(`📁 ${ctx.cwd}:`);
+    lines.push(`📁 ${wd}:`);
     for (const w of reconciled) {
       const icon = w.status === "in-progress" ? "◆" :
         w.status === "paused" ? "⏸" :
@@ -444,6 +449,7 @@ function cmdList(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
 // ── SETPHASE ─────────────────────────────────────────────────────────
 
 function cmdSetPhase(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
+  const wd = resolveProjectDir(ctx.cwd);
   const parsed = parseArgs(args);
   const raw = parsed.phase;
   const phaseName = parsed.phasename;
@@ -462,11 +468,11 @@ function cmdSetPhase(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
     return;
   }
 
-  const wf = getActiveWorkflow(ctx.cwd);
+  const wf = getActiveWorkflow(wd);
   if (!wf) { noActive(ctx); return; }
   const oldPhase = wf.currentPhase;
 
-  const t = readTracking(ctx.cwd);
+  const t = readTracking(wd);
   if (t) {
     const idx = t.workflows.findIndex(w => w.name === wf.name);
     if (idx !== -1) {
@@ -475,7 +481,7 @@ function cmdSetPhase(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
         p.status = i < phase ? "completed" : i === phase ? "in-progress" : "pending";
       });
       t.workflows[idx].updated = new Date().toISOString();
-      writeTracking(ctx.cwd, t);
+      writeTracking(wd, t);
     }
   }
   const gt = readGlobalTracking();
@@ -485,7 +491,7 @@ function cmdSetPhase(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
     writeGlobalTracking(gt);
   }
 
-  updateFooter(ctx, ctx.cwd);
+  updateFooter(ctx, wd);
   if (oldPhase !== phase) notifyPhase(ctx, wf, oldPhase);
   reply(ctx, `▶️ Phase: ${PHASE_NAMES[phase]} (${phase + 1}/${PHASE_NAMES.length})`);
 }
@@ -493,7 +499,8 @@ function cmdSetPhase(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
 // ── NEXT ─────────────────────────────────────────────────────────────
 
 function cmdNext(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
-  const wf = getActiveWorkflow(ctx.cwd);
+  const wd = resolveProjectDir(ctx.cwd);
+  const wf = getActiveWorkflow(wd);
   if (!wf) { noActive(ctx); return; }
 
   const next = wf.currentPhase + 1;
@@ -503,7 +510,7 @@ function cmdNext(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
   }
 
   const oldPhase = wf.currentPhase;
-  const t = readTracking(ctx.cwd);
+  const t = readTracking(wd);
   if (t) {
     const idx = t.workflows.findIndex(w => w.name === wf.name);
     if (idx !== -1) {
@@ -512,7 +519,7 @@ function cmdNext(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
         p.status = i < next ? "completed" : i === next ? "in-progress" : "pending";
       });
       t.workflows[idx].updated = new Date().toISOString();
-      writeTracking(ctx.cwd, t);
+      writeTracking(wd, t);
     }
   }
   const gt = readGlobalTracking();
@@ -522,7 +529,7 @@ function cmdNext(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
     writeGlobalTracking(gt);
   }
 
-  updateFooter(ctx, ctx.cwd);
+  updateFooter(ctx, wd);
   notifyPhase(ctx, wf, oldPhase);
   reply(ctx, `✅ ${PHASE_NAMES[next]} (${next + 1}/${PHASE_NAMES.length})`);
 }
@@ -530,18 +537,19 @@ function cmdNext(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
 // ── COMPLETE ─────────────────────────────────────────────────────────
 
 function cmdComplete(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
-  const wf = getActiveWorkflow(ctx.cwd);
+  const wd = resolveProjectDir(ctx.cwd);
+  const wf = getActiveWorkflow(wd);
   if (!wf) { replyWarn(ctx, "No active workflow."); return; }
 
   ctx.ui?.setStatus("workflow", undefined);
 
-  const t = readTracking(ctx.cwd);
+  const t = readTracking(wd);
   if (t) {
     const idx = t.workflows.findIndex(w => w.name === wf.name);
     if (idx !== -1) {
       t.workflows[idx].status = "completed";
       t.workflows[idx].updated = new Date().toISOString();
-      writeTracking(ctx.cwd, t);
+      writeTracking(wd, t);
     }
   }
   const gt = readGlobalTracking();
@@ -557,6 +565,7 @@ function cmdComplete(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
 // ── GOTO ─────────────────────────────────────────────────────────────
 
 function cmdGoto(_pi: ExtensionAPI, args: string, _ctx: CmdCtx) {
+  const wd = resolveProjectDir(ctx.cwd);
   const parsed = parseArgs(args);
   const name = parsed.name || parsed._[0];
   const gt = readGlobalTracking();
@@ -582,6 +591,7 @@ function cmdGoto(_pi: ExtensionAPI, args: string, _ctx: CmdCtx) {
 // ── RENAME ───────────────────────────────────────────────────────────
 
 function cmdRename(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
+  const wd = resolveProjectDir(ctx.cwd);
   const parsed = parseArgs(args);
   // Join all positional tokens (like cmdStart) — renameWorkflow toSafeNames internally
   const newName = parsed.name || (parsed._.length > 0 ? parsed._.join(" ") : undefined);
@@ -590,43 +600,45 @@ function cmdRename(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
     return;
   }
 
-  const wf = getActiveWorkflow(ctx.cwd);
+  const wf = getActiveWorkflow(wd);
   if (!wf) { noActive(ctx); return; }
 
-  const result = renameWorkflow(ctx.cwd, wf.name, newName);
+  const result = renameWorkflow(wd, wf.name, newName);
   if (!result.ok) { replyWarn(ctx, `❌ ${result.error}`); return; }
 
-  updateFooter(ctx, ctx.cwd);
+  updateFooter(ctx, wd);
   ctx.ui?.notify(`✨ Renamed to "${toSafeName(newName)}"`, "success");
 }
 
 // ── MENU ─────────────────────────────────────────────────────────────
 
 function cmdMenu(_pi: ExtensionAPI, _args: string, ctx: CmdCtx) {
-  showOverlay(ctx, ctx.cwd);
+  const wd = resolveProjectDir(ctx.cwd);
+  showOverlay(ctx, wd);
   // Overlay is interactive; no notify needed — user sees TUI.
 }
 
 // ── CLEAN ────────────────────────────────────────────────────────────
 
 function cmdClean(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
+  const wd = resolveProjectDir(ctx.cwd);
   const parsed = parseArgs(args);
 
   // ── /pw:clean purge — delete archived workflow dirs from disk ──
   if (parsed._.includes("purge") || parsed.purge !== undefined) {
-    const diskWfs = scanWorkflowDirs(ctx.cwd).filter(dw => dw.status === "archived");
+    const diskWfs = scanWorkflowDirs(wd).filter(dw => dw.status === "archived");
     if (diskWfs.length === 0) {
       replyWarn(ctx, "No archived workflows to purge.");
       return;
     }
     let deleted = 0;
     for (const dw of diskWfs) {
-      const dirPath = join(ctx.cwd, WORKFLOW_DIR, dw.dateStamp, dw.dirHash);
+      const dirPath = join(wd, WORKFLOW_DIR, dw.dateStamp, dw.dirHash);
       try {
         rmSync(dirPath, { recursive: true, force: true });
         deleted++;
       } catch { /* skip if can't delete */ }
-      removeWorkflowFromTracking(ctx.cwd, dw.name);
+      removeWorkflowFromTracking(wd, dw.name);
     }
     reply(ctx, `🗑️ Purged ${deleted} archived workflow(s) from disk.`);
     return;
@@ -635,7 +647,7 @@ function cmdClean(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
   const hours = parseInt(parsed.hours || "4", 10);
   const cutoff = Date.now() - hours * 60 * 60 * 1000;
 
-  const t = readTracking(ctx.cwd);
+  const t = readTracking(wd);
   if (!t) { replyWarn(ctx, "No tracking data."); return; }
 
   const orphans = t.workflows.filter(w => {
@@ -652,7 +664,7 @@ function cmdClean(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
     const idx = t.workflows.findIndex(w => w.name === o.name);
     if (idx !== -1) t.workflows[idx].status = "archived";
   }
-  writeTracking(ctx.cwd, t);
+  writeTracking(wd, t);
 
   const gt = readGlobalTracking();
   if (gt) {

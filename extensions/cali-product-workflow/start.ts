@@ -6,7 +6,7 @@ import type { Workflow } from "./types";
 import {
   parsedInputStore, readTracking, writeTracking,
   readGlobalTracking, writeGlobalTracking,
-  getAllActiveWorkflows,
+  getAllActiveWorkflows, resolveProjectDir,
   toSafeName, generatePlaceholderName, generateDirHash, getDateStamp,
   readSourceFile, truncateText
 } from "./state";
@@ -49,6 +49,7 @@ function reply(ctx: ExtensionCommandContext, text: string): void {
 export default async function cmdStart(
   pi: ExtensionAPI, rawArgs: string, ctx: ExtensionCommandContext
 ): Promise<void> {
+  const wd = resolveProjectDir(ctx.cwd);
   const parsed = parseArgs(rawArgs);
   const sessionId = ctx.sessionId || "default";
   const storeParsed = parsedInputStore.get(sessionId) || { sources: [], draftText: "" };
@@ -61,9 +62,9 @@ export default async function cmdStart(
   const userGivenName = parsed.name || null;
 
   // 1. Check for orphans
-  const active = getAllActiveWorkflows(ctx.cwd);
+  const active = getAllActiveWorkflows(wd);
   if (active.length > 0) {
-    const decision = await showOrphanOverlay(ctx, ctx.cwd, active);
+    const decision = await showOrphanOverlay(ctx, wd, active);
     if (decision === "cancelled") {
       ctx.ui?.notify("Start cancelled", "info");
       return;
@@ -95,7 +96,7 @@ export default async function cmdStart(
   if (allSrc) fullDraft += allSrc;
 
   // 4. Initialize tracking
-  let tracking = readTracking(ctx.cwd);
+  let tracking = readTracking(wd);
   if (!tracking) {
     tracking = {
       $schema: SCHEMA_URL, version: "1.0",
@@ -122,15 +123,15 @@ export default async function cmdStart(
     })),
     created: new Date().toISOString(),
     updated: new Date().toISOString(),
-    cwd: ctx.cwd,
+    cwd: wd,
   };
 
   tracking.workflows.push(wf);
-  writeTracking(ctx.cwd, tracking);
+  writeTracking(wd, tracking);
 
   // 6. Create directory (hash-based — stable)
   const ds = getDateStamp();
-  const wfDir = join(ctx.cwd, WORKFLOW_DIR, ds, dirHash);
+  const wfDir = join(wd, WORKFLOW_DIR, ds, dirHash);
   mkdirSync(wfDir, { recursive: true });
   for (const sub of ["specs", "interfaces", "plans/scopes", "critiques", "approvals", "sessions"]) {
     mkdirSync(join(wfDir, sub), { recursive: true });
@@ -158,14 +159,14 @@ export default async function cmdStart(
   writeGlobalTracking(gt);
 
   // 9. UI
-  updateFooter(ctx, ctx.cwd);
+  updateFooter(ctx, wd);
   parsedInputStore.delete(sessionId);
 
   // 10. Output — use notify so user sees feedback immediately
   const lines = [
     `✅ Workflow '${finalName}' started!`,
     `Stage: ${PHASE_NAMES[0]}`,
-    `Dir:   ${wfDir.replace(ctx.cwd + "/", "")}`,
+    `Dir:   ${wfDir.replace(wd + "/", "")}`,
   ];
   if (draftText) {
     lines.push(`\n📝 Draft:\n${draftText.slice(0, 300)}${draftText.length > 300 ? "..." : ""}`);

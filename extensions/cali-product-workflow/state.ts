@@ -46,6 +46,24 @@ function getGlobalTrackingPath(): string {
   return join(process.env.HOME || dirname(process.cwd()), GLOBAL_TRACKING_FILE);
 }
 
+// ── Project root detection ───────────────────────────────────────────
+
+/**
+ * Walk up from `cwd` looking for the project root that contains
+ * `product-workflow/` directory or `cali-product-workflow.json` tracking file.
+ * Returns the first matching ancestor, or the original cwd if none found.
+ */
+export function resolveProjectDir(cwd: string): string {
+  let dir = cwd;
+  while (dir !== "/") {
+    if (existsSync(join(dir, WORKFLOW_DIR)) || existsSync(join(dir, TRACKING_FILE))) {
+      return dir;
+    }
+    dir = dirname(dir);
+  }
+  return cwd;
+}
+
 // ── Read / Write ─────────────────────────────────────────────────────
 
 /** Normalize legacy "slug" → "name" for old tracking data */
