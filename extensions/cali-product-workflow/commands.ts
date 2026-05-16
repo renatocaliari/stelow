@@ -633,7 +633,6 @@ function cmdClean(_pi: ExtensionAPI, args: string, ctx: CmdCtx) {
   }
 
 
-  const parsed = parseArgs(args);
   const hours = parseInt(parsed.hours || "4", 10);
   const cutoff = Date.now() - hours * 60 * 60 * 1000;
 
