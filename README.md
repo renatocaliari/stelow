@@ -1,137 +1,137 @@
 # @renatocaliari/pi-product-workflow
 
-Complete product workflow package for pi.dev coding agent. Includes **15 specialized skills**, a powerful **extension with workflow commands**, and real-time **UI tracking**.
+Complete product workflow package for pi.dev coding agent. Includes **15 specialized skills**, a powerful **extension with workflow commands**, and real-time **TUI tracking**.
 
 ---
 
 ## 🚀 Quick Start
 
 ```bash
-# Start a new workflow (auto-generates slug)
+# Start a new workflow
 /product-workflow-start
 
 # With file references and draft text
-/product-workflow-start @brief.md "additional context here"
+/product-workflow-start @brief.md "additional context"
 
 /product-workflow-start @spec.md @requirements.md "OAuth login flow"
 
-# See status
-/product-workflow-status
-
-# Advance through phases
-/product-workflow-next
-
-# Emergency stop!
-/product-workflow-stop
+# Run the skill
+/skill:cali-product-workflow
 ```
 
 ---
 
-## 🎮 Workflow Commands
+## 🎮 Commands
 
-All commands use the `/product-workflow-` prefix.
-
-### Core Commands
+All commands use the `/product-workflow-` prefix:
 
 | Command | Description |
 |---------|-------------|
-| `/product-workflow-start` | Start new workflow. Auto-generates slug. Parses `@filename` as source and text as draft. |
-| `/product-workflow-stop` | **Emergency stop!** Clears UI and aborts workflow immediately. |
-| `/product-workflow-pause` | Pause workflow (keeps state for later). |
-| `/product-workflow-resume` | Resume paused workflow. Optional: `slug=myslug` |
-| `/product-workflow-status` | Show current workflow with progress bar and details. |
+| `/product-workflow-start` | Start workflow. Parses `@filename` and text as draft. |
+| `/product-workflow-stop` | **Stop** and clear UI immediately. |
+| `/product-workflow-pause` | Pause (keeps state). |
+| `/product-workflow-resume` | Resume paused. Optional: `slug=myname` |
+| `/product-workflow-status` | Show current status. |
 | `/product-workflow-list` | List all workflows (project + global). |
-| `/product-workflow-setphase phase=N` | Set phase (0-5). See phases below. |
+| `/product-workflow-setphase phase=N` | Set phase (0-6). |
 | `/product-workflow-next` | Advance to next phase. |
-| `/product-workflow-complete` | Mark workflow as completed. |
-| `/product-workflow-goto` | Show how to navigate to a workflow in another project. |
+| `/product-workflow-complete` | Mark as completed. |
+| `/product-workflow-goto` | Navigate to workflow in another project. |
 
-### Input Parsing
-
-The `start` command intelligently parses your input:
+### Input Parsing Examples
 
 ```
 /product-workflow-start                       → Random slug
-/product-workflow-start @brief.md             → Slug from filename, file as source
-/product-workflow-start Login flow            → Slug: "login-flow", text as draft
-/product-workflow-start @spec.md "OAuth"       → Both file and draft text
-/product-workflow-start @doc1.md @doc2.md      → Multiple source files
-/product-workflow-start slug=custom-name      → Explicit slug (overrides auto)
-```
-
-### Smart Slug Generation
-
-| Input | Generated Slug |
-|-------|---------------|
-| `@auth-brief.md` | `auth-brief` |
-| `login with OAuth` | `login-with-oauth` |
-| `build payment system` | `build-payment-system` |
-| (nothing) | `workflow-20260615-a3b2` |
-
----
-
-## 📊 Workflow Phases
-
-The workflow follows 6 phases (inspired by Shape Up):
-
-| # | Phase | Description |
-|---|-------|-------------|
-| 0 | **Clarify** | Understand the problem, gather requirements, define scope |
-| 1 | **Shape** | Create rough solution sketch, evaluate appetite, identify Rabbit Holes |
-| 2 | **Bet** | Commit to a scope, prepare for execution, stakeholder alignment |
-| 3 | **Build** | Implement the solution, iterate based on feedback |
-| 4 | **Critique** | Review and validate the implementation |
-| 5 | **Gate** | Final approval, merge, deployment |
-
-### Phase Progression
-
-```
-Clarify → Shape → Bet → Build → Critique → Gate
-   ○        ○      ○      ○        ○        ○   (not started)
-   ●        ▶      ○      ○        ○        ○   (Clarify in progress)
-   ●        ●      ●      ▶        ○        ○   (Build in progress)
-   ●        ●      ●      ●        ●        ●   (completed)
+/product-workflow-start @brief.md             → Slug from filename
+/product-workflow-start Login flow            → Slug from text
+/product-workflow-start @spec.md "OAuth"       → Both file and draft
 ```
 
 ---
 
-## 🖥️ UI Features
+## 📊 Workflow Stages (Phases)
 
-When a workflow is active, the extension shows:
+The workflow has **7 stages** that match exactly with `/skill:cali-product-workflow`:
 
-### Footer Status
-```
-📍 auth-system [Shape 2/6] 33%
-```
+| # | Stage | Skill Reference | Description |
+|---|-------|-----------------|-------------|
+| 0 | **Clarify** | Fase 0 | Initial questions, auto-discovery, workflow setup |
+| 1 | **Shape** | Fase 1 | Shape Up Planning — understand, scope, risks |
+| 2 | **Interface** | Fase 2 | Interface Brainstorming (conditional) |
+| 3 | **Critique** | Fase 3 | Plan Critique — gap analysis |
+| 4 | **Gate** | Fase 4 | Review Gate — Plannotator approval |
+| 5 | **Planning** | Fase 5 | Tech Planning Sequencing |
+| 6 | **Execution** | Fase 6 | Supervisor + Scope Executor |
 
-### Progress Widget (above editor)
-```
-🚀 auth-system
-[████████░░░░░░░░░░░░] 33% — Shape
-● Clarify ▶ Shape ○ Bet ○ Build ○ Critique ○ Gate
-```
+### Stage Progression
 
-### Notifications
-- Phase transitions: `📍 Phase 2: Shape`
-- Session resume: `📍 Resumed: auth-system (Phase 2: Shape)`
-- Workflow found: `📍 Found workflow: my-feature`
+```
+Clarify → Shape → Interface → Critique → Gate → Planning → Execution
+   ○        ○         ○         ○         ○        ○          ○   (not started)
+   ▶        ○         ○         ○         ○        ○          ○   (Clarify active)
+   ✓        ✓         ▶         ○         ○        ○          ○   (Interface active)
+   ✓        ✓         ✓         ✓         ✓        ✓          ▶   (Execution active)
+   ✓        ✓         ✓         ✓         ✓        ✓          ✓   (completed)
+```
 
 ---
 
-## 🌐 Cross-Project State
+## 🖥️ TUI Updates
 
-Workflows are tracked in two places:
-1. **Local**: `{project}/cali-product-workflow.json` — per-project workflows
-2. **Global**: `~/.cali-product-workflow-global.json` — all workflows
+When a workflow is active, the **TUI updates automatically** as the skill progresses through stages.
 
-### State Persistence
+### What Triggers Updates
 
-| Scenario | Behavior |
-|----------|----------|
-| Session restart | UI restored from tracking file |
-| Different project folder | No active workflow (unless from global) |
-| `/product-workflow-list` | Shows workflows from all projects |
-| `/product-workflow-goto` | Shows navigation instructions |
+| Trigger | TUI Change | Example |
+|---------|-----------|---------|
+| `/product-workflow-start` | **Adds** footer + widget | `▶ auth-system [Shape]` |
+| Skill advances phase | **Updates** footer + widget | `▶ auth-system [Interface]` |
+| `/product-workflow-pause` | Footer changes to PAUSED | `⏸ auth-system` |
+| `/product-workflow-resume` | Footer returns to normal | `▶ auth-system [Shape]` |
+| `/product-workflow-stop` | **Removes** footer + widget | Cleared |
+| `/product-workflow-complete` | **Removes** footer + widget | Cleared |
+| New session (workflow exists) | **Restores** footer + widget | Same as start |
+| Phase transition | **Toast notification** | `▶ Workflow: auth — Phase 2: Interface` |
+
+### TUI Visual
+
+**Active Workflow:**
+```
+┌─────────────────────────────────────────────────────┐
+│  ▶ Workflow:                                        │
+│    auth-system                                      │
+│    Phase: 2/7                                       │
+│    Stage: Interface                                 │
+│                                                     │
+│  ✓ Clarify  ▶ Interface  ○ Critique  ○ Gate  ...   │
+└─────────────────────────────────────────────────────┘
+│  ▶ auth-system [Interface]                         │  ← Footer
+└─────────────────────────────────────────────────────┘
+```
+
+**Paused:**
+```
+│  ⏸ auth-system                                     │  ← Footer (warning color)
+└─────────────────────────────────────────────────────┘
+```
+
+### How Updates Work
+
+The skill writes to `cali-product-workflow.json` when it advances phases. The extension watches for these changes:
+
+1. **Skill advances phase** → writes to tracking file
+2. **Extension detects change** (via `tool_call` and `turn_end` events)
+3. **TUI updates** automatically — no command needed from user
+
+### TUI Element Names
+
+All TUI elements use clear, user-facing names:
+
+| Element | Label | Purpose |
+|---------|-------|---------|
+| Footer status | `▶ {slug} [{stage}]` | Current workflow + stage |
+| Widget | `▶ Workflow:` | Shows full workflow info |
+| Notification | `▶ Workflow: {name} — Phase {n}: {stage}` | Phase transitions |
 
 ---
 
@@ -141,93 +141,40 @@ Workflows are tracked in two places:
 
 | Skill | Invocation | What it Does |
 |-------|-----------|--------------|
-| **Product Workflow** | `/skill:cali-product-workflow` | Main workflow orchestrator: Shape Up + Interface Design + Tech Planning + Plan Critique + Plannotator Gate |
-| **Short Cycle** | `/skill:cali-product-short-cycle` | Rapid validation method: experiments, metrics, pre-sales, MVP, customer discovery, pricing strategies |
-| **Opportunity Mapping** | `/skill:cali-product-opportunity-mapping` | Strategic opportunity analysis with ranked solutions for any business problem |
-| **Job-to-Be-Done** | `/skill:cali-product-job-to-be-done` | JTBD framework: contextual segmentation, thinking styles (Indi Young), job maps, desired outcomes |
-| **Evolutionary Principles** | `/skill:cali-product-evolutionary-principles` | Stepping-stones theory, novelty search, adaptive product ecosystems |
-| **Multi-Method Market Analysis** | `/skill:cali-product-multi-method-market-analysis` | Deep market research: PESTLE, Wardley Maps, Foresight, Delphi method |
-| **Scope Executor** | `/skill:cali-product-scope-executor` | Autonomous execution of approved scopes with overnight capabilities |
+| **Product Workflow** | `/skill:cali-product-workflow` | Main orchestrator: Shape Up → Interface → Critique → Gate → Planning → Execution |
+| **Short Cycle** | `/skill:cali-product-short-cycle` | Rapid validation: experiments, metrics, pre-sales, MVP |
+| **Opportunity Mapping** | `/skill:cali-product-opportunity-mapping` | Strategic opportunity analysis |
+| **Job-to-Be-Done** | `/skill:cali-product-job-to-be-done` | JTBD framework for needs discovery |
+| **Evolutionary Principles** | `/skill:cali-product-evolutionary-principles` | Stepping-stones, product evolution |
+| **Multi-Method Market** | `/skill:cali-product-multi-method-market-analysis` | PESTLE, Wardley Maps, Delphi, Foresight |
+| **Scope Executor** | `/skill:cali-product-scope-executor` | Execute approved scopes autonomously |
 
 ### Growth & Marketing Skills (8)
 
 | Skill | Invocation | What it Does |
 |-------|-----------|--------------|
-| **Ads** | `/skill:cali-product-ads` | Advertising strategies based on Transtheoretical Model of Change (5 stages of awareness) |
-| **Business Models** | `/skill:cali-product-business-models` | Business model creativity for reducing costs and generating revenue |
-| **Health** | `/skill:cali-product-health` | Product health monitoring through signals in tension (effectiveness vs well-being) |
-| **Marketplace Playbook** | `/skill:cali-product-marketplace-playbook` | Marketplace stimulation tactics: supply/demand balance, 19 proven strategies |
-| **Open Source** | `/skill:cali-product-open-source` | Open source strategy paradox: delivering value by giving up control |
-| **Pricing** | `/skill:cali-product-pricing` | Pricing strategies: exchange bases, consumption control, interest alignment |
-| **Promotions** | `/skill:cali-product-promotions` | MAGIC framework launch promotions: Loss Leader, Gift Card Sale, Limited Package, Irresistible Freebie |
-| **Trust Building** | `/skill:cali-product-trust-building` | Trust mechanisms: 10 pillars, guarantee types, strategic approaches |
+| **Ads** | `/skill:cali-product-ads` | Transtheoretical Model advertising |
+| **Business Models** | `/skill:cali-product-business-models` | Business model creativity |
+| **Health** | `/skill:cali-product-health` | Product health monitoring |
+| **Marketplace Playbook** | `/skill:cali-product-marketplace-playbook` | Supply/demand balance tactics |
+| **Open Source** | `/skill:cali-product-open-source` | Open source strategy |
+| **Pricing** | `/skill:cali-product-pricing` | Pricing strategies |
+| **Promotions** | `/skill:cali-product-promotions` | MAGIC launch promotions |
+| **Trust Building** | `/skill:cali-product-trust-building` | Trust mechanisms |
 
 ---
 
-## 🔧 Dependencies & Integration
+## 🔧 Dependencies
 
-This package integrates with other pi.dev extensions for full orchestration:
-
-| Extension | Package | Author | Purpose |
-|-----------|---------|--------|---------|
-| **pi-subagents** | `pi-subagents` | nicobailon | Parallel subagent execution, chain workflows, built-in agents (scout, reviewer, planner, worker) |
-| **pi-goal** | `@capyup/pi-goal` | capyup | Goal mode: `/goal`, `/sisyphus`, `/goals-set` for long-running work |
-| **plannotator** | `@plannotator/pi-extension` | backnotprop | Plan review with visual annotations (`--gate` flag for approval gates) |
-| **autoresearch** | `pi-autoresearch` | davebcn87 | Autonomous experiment loop for optimization |
-| **ask-user-question** | `@juicesharp/rpiv-ask-user-question` | juicesharp | Structured user questions with 2-4 options |
-| **intercom** | `pi-intercom` | nicobailon | Session-to-session messaging and coordination |
-| **supervisor** | `pi-supervisor` | tintinweb | Chat steering toward specific outcomes |
-
-### Recommended Setup
-
-```bash
-# Install main package
-pi install ~/Development/pi-product-workflow
-
-# Install all dependencies
-pi install npm:pi-subagents npm:@capyup/pi-goal @plannotator/pi-extension pi-autoresearch @juicesharp/rpiv-ask-user-question pi-intercom pi-supervisor
-```
-
----
-
-## 📁 Directory Structure
-
-```
-product-workflow/
-└── {YYYY-MM-DD}/
-    └── {slug}/
-        ├── index.json                  # Workflow metadata
-        ├── specs/                      # Shape Up output
-        ├── interfaces/                 # Interface proposals
-        ├── plans/                      # Tech plans
-        ├── critiques/                  # Plan critiques
-        ├── approvals/                  # Plannotator receipts
-        └── sessions/                   # Session checkpoints
-```
-
-### Tracking Files
-
-| File | Location | Purpose |
-|------|----------|---------|
-| `cali-product-workflow.json` | Project root | Local workflow state |
-| `.cali-product-workflow-global.json` | Home directory | Cross-project workflows |
-
----
-
-## 🔌 Extension Details
-
-The extension (`extensions/cali-product-workflow/`) hooks into:
-
-| Event | What it does |
-|-------|--------------|
-| `input` | Parse `@filename` refs and draft text for `/product-workflow-start` |
-| `session_start` | Create directories, restore UI, register commands |
-| `turn_end` | Check for phase changes, update UI |
-| `agent_end` | Final UI update |
-
-### Hot Reload
-
-Commands are registered on session start. Use `/reload` to pick up changes without restarting pi.
+| Extension | Package | Purpose |
+|-----------|---------|---------|
+| **pi-subagents** | `pi-subagents` | Parallel execution, built-in agents |
+| **pi-goal** | `@capyup/pi-goal` | `/goal`, `/sisyphus` modes |
+| **plannotator** | `@plannotator/pi-extension` | Plan review with `--gate` |
+| **autoresearch** | `pi-autoresearch` | Optimization experiments |
+| **ask-user-question** | `@juicesharp/rpiv-ask-user-question` | Structured questions |
+| **intercom** | `pi-intercom` | Session messaging |
+| **supervisor** | `pi-supervisor` | Outcome steering |
 
 ---
 
@@ -240,9 +187,18 @@ pi install ~/Development/pi-product-workflow
 # From npm (after publishing)
 pi install npm:@renatocaliari/pi-product-workflow
 
-# Copy AGENTS.md for automatic triggering (recommended)
+# Copy AGENTS.md for automatic triggering
 cp ~/Development/pi-product-workflow/AGENTS.md ~/.pi/agent/AGENTS.md
 ```
+
+---
+
+## 📁 Tracking Files
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `cali-product-workflow.json` | Project root | Local workflow state |
+| `.cali-product-workflow-global.json` | Home directory | Cross-project workflows |
 
 ---
 
@@ -255,63 +211,3 @@ cp ~/Development/pi-product-workflow/AGENTS.md ~/.pi/agent/AGENTS.md
 ## License
 
 MIT - Cali 2024
-
----
-
-## Examples
-
-### Start from a document
-```bash
-/product-workflow-start @ PRD.md "We also need SSO support"
-```
-
-### Check status
-```bash
-/product-workflow-status
-```
-Output:
-```
-📋 Workflow: auth-system
-Progress: [████░░░░░░░░░░░░] 17%
-Phase: 1/6 — Clarify
-
-Phases:
-  ▶ 🔄 1. Clarify
-    ⬜ 2. Shape
-    ⬜ 3. Bet
-    ⬜ 4. Build
-    ⬜ 5. Critique
-    ⬜ 6. Gate
-```
-
-### Navigate between projects
-```bash
-# List all workflows
-/product-workflow-list
-```
-Output:
-```
-📁 Current Project:
-  🔄 auth-system [in-progress] — Phase 2: Shape
-
-🌐 Global (other projects):
-  🔄 billing-api [in-progress] — Phase 4: Build
-     Project: /Users/cali/projects/billing-api
-```
-
-### Jump to another project
-```bash
-/product-workflow-goto slug=billing-api
-```
-Output:
-```
-📍 Workflow: billing-api
-Project: /Users/cali/projects/billing-api
-Phase: Build
-
-To continue this workflow:
-  1. Navigate: cd /Users/cali/projects/billing-api
-  2. Resume: /product-workflow-resume slug=billing-api
-
-Or the LLM will auto-detect it when you open that project.
-```

@@ -7,7 +7,16 @@ const TRACKING_FILE = "cali-product-workflow.json";
 const GLOBAL_TRACKING_FILE = ".cali-product-workflow-global.json";
 const SCHEMA_URL = "https://raw.githubusercontent.com/renatocaliari/pi-product-workflow/main/cali-product-workflow.schema.json";
 
-const PHASE_NAMES = ["Clarify", "Shape", "Bet", "Build", "Critique", "Gate"];
+// Phases matching the skill exactly (Fase 0 through Fase 6)
+const PHASE_NAMES = [
+  "Clarify",   // Fase 0: Initial questions
+  "Shape",     // Fase 1: Shape Up
+  "Interface", // Fase 2: Interface Brainstorming (conditional)
+  "Critique",  // Fase 3: Plan Critique
+  "Gate",      // Fase 4: Review Gate
+  "Planning",  // Fase 5: Tech Planning
+  "Execution"  // Fase 6: Supervisor + Execution
+];
 
 // Shared state for input parsing
 interface ParsedInput {
@@ -155,33 +164,30 @@ function truncateText(text: string, maxLen: number): string {
 
 function getStatusText(workflow: Workflow): string {
   const phaseName = PHASE_NAMES[workflow.currentPhase] || "Unknown";
-  const pct = Math.round(((workflow.currentPhase + 1) / PHASE_NAMES.length) * 100);
-  return `${workflow.slug} [${phaseName} ${workflow.currentPhase + 1}/${PHASE_NAMES.length}] ${pct}%`;
+  return `${workflow.slug} [${phaseName}]`;
 }
 
-function getProgressBar(workflow: Workflow, theme: any): string[] {
-  const pct = Math.round(((workflow.currentPhase + 1) / PHASE_NAMES.length) * 100);
-  const barLen = 20;
-  const filled = Math.round((pct / 100) * barLen);
-  const bar = "█".repeat(filled) + "░".repeat(barLen - filled);
-  
+function getStatusLines(workflow: Workflow, theme: any): string[] {
   const lines = [
-    theme.fg("accent", "🚀") + " " + theme.fg("text", workflow.slug),
-    `[${bar}] ${pct}% — ${PHASE_NAMES[workflow.currentPhase]}`,
-    ""
+    theme.fg("accent", "▶") + " " + theme.fg("text", "Workflow:"),
+    "  " + theme.fg("success", workflow.slug),
+    "  " + theme.fg("muted", "Phase:") + " " + theme.fg("accent", `${workflow.currentPhase + 1}/${PHASE_NAMES.length}`),
+    "  " + theme.fg("muted", "Stage:") + " " + theme.fg("text", PHASE_NAMES[workflow.currentPhase])
   ];
   
-  const phaseLine = PHASE_NAMES.map((name, i) => {
+  // Show phase list
+  lines.push("");
+  const phaseList = PHASE_NAMES.map((name, i) => {
     if (i < workflow.currentPhase) {
-      return theme.fg("success", "●") + " " + theme.fg("muted", name);
+      return theme.fg("success", "✓") + " " + theme.fg("muted", name);
     } else if (i === workflow.currentPhase) {
-      return theme.fg("success", "▶") + " " + theme.fg("accent", name);
+      return theme.fg("accent", "▶") + " " + theme.fg("accent", name);
     } else {
       return theme.fg("dim", "○") + " " + theme.fg("dim", name);
     }
-  }).join(" ");
+  }).join("  ");
+  lines.push(phaseList);
   
-  lines.push(phaseLine);
   return lines;
 }
 
@@ -192,15 +198,16 @@ function updateWorkflowUI(ctx: ExtensionContext, cwd: string): void {
   
   if (!workflow) {
     ctx.ui.setStatus("workflow", undefined);
-    ctx.ui.setWidget("workflow-progress", undefined);
+    ctx.ui.setWidget("workflow-status", undefined);
     return;
   }
   
   const statusText = getStatusText(workflow);
-  ctx.ui.setStatus("workflow", ctx.ui.theme.fg("accent", "📍 " + statusText));
+  ctx.ui.setStatus("workflow", ctx.ui.theme.fg("accent", "▶ " + statusText));
   
-  ctx.ui.setWidget("workflow-progress", (_tui, theme) => ({
-    render: (_width) => getProgressBar(workflow, theme),
+  // Simple status widget - just shows current state, no progress bar
+  ctx.ui.setWidget("workflow-status", (_tui, theme) => ({
+    render: (_width) => getStatusLines(workflow, theme),
     invalidate: () => {}
   }), { placement: "aboveEditor" });
 }
@@ -209,7 +216,10 @@ function notifyPhaseChange(ctx: ExtensionContext, workflow: Workflow, oldPhase: 
   if (!ctx.ui) return;
   if (oldPhase !== workflow.currentPhase) {
     const phaseName = PHASE_NAMES[workflow.currentPhase] || "Unknown";
-    ctx.ui.notify(`📍 Phase ${workflow.currentPhase + 1}: ${phaseName}`, "info");
+    ctx.ui.notify(
+      `▶ Workflow: ${workflow.slug} — Phase ${workflow.currentPhase + 1}: ${phaseName}`,
+      "info"
+    );
   }
 }
 
@@ -217,9 +227,9 @@ function notifyPhaseChange(ctx: ExtensionContext, workflow: Workflow, oldPhase: 
 
 function registerCommands(pi: ExtensionAPI): void {
   
-  // /product-workflow-start - Start a new workflow
+  // /product-workflow-start
   pi.registerCommand("product-workflow-start", {
-    description: "Start a new product workflow. Auto-generates slug if not provided. Parses @filename references as source files and trailing text as draft content.",
+    description: "Start a new Workflow. Auto-generates slug if not provided. Parses @filename references as source files and trailing text as draft content.",
     handler: async (args, ctx) => {
       const sessionId = ctx.sessionId || "default";
       const parsed = parsedInputStore.get(sessionId) || { sources: [], draftText: "" };
@@ -283,19 +293,19 @@ function registerCommands(pi: ExtensionAPI): void {
       updateWorkflowUI(ctx, ctx.cwd);
       parsedInputStore.delete(sessionId);
       
-      const lines: string[] = [`✅ Workflow '${slug}' started!`, `Current phase: ${PHASE_NAMES[0]}`, `Project: ${ctx.cwd}`];
+      const lines: string[] = [`✅ Workflow '${slug}' started!`, `Stage: ${PHASE_NAMES[0]}`, `Project: ${ctx.cwd}`];
       if (sources.length > 0) lines.push(`📎 Sources: ${sources.join(', ')}`);
       if (draftText) lines.push(`\n📝 Draft:\n${draftText.slice(0, 300)}${draftText.length > 300 ? '...' : ''}`);
-      if (allSourceContent) lines.push(`\n📄 Source content loaded (${allSourceContent.length} chars)`);
-      lines.push("", `Run /skill:cali-product-workflow to begin planning.`);
+      if (allSourceContent) lines.push(`\n📄 Source content loaded`);
+      lines.push("", `Run /skill:cali-product-workflow to begin.`);
       
       return lines.join("\n");
     }
   });
   
-  // /product-workflow-stop - Stop and clear
+  // /product-workflow-stop
   pi.registerCommand("product-workflow-stop", {
-    description: "Stop the active workflow immediately, clear all UI elements, and abort any running work.",
+    description: "Stop the Workflow immediately and clear all UI.",
     handler: async (args, ctx) => {
       const workflow = getActiveWorkflow(ctx.cwd);
       if (!workflow) {
@@ -307,15 +317,15 @@ function registerCommands(pi: ExtensionAPI): void {
             writeGlobalTracking(globalTracking);
           }
           ctx.ui.setStatus("workflow", undefined);
-          ctx.ui.setWidget("workflow-progress", undefined);
-          ctx.ui.notify("Workflow stopped and cleared", "info");
-          return `❌ Workflow '${global.slug}' stopped and cleared.\nUI has been reset.`;
+          ctx.ui.setWidget("workflow-status", undefined);
+          ctx.ui.notify("Workflow stopped", "info");
+          return `❌ Workflow '${global.slug}' stopped.\nUI cleared.`;
         }
-        return "No active workflow to stop.";
+        return "No active Workflow to stop.";
       }
       
       ctx.ui.setStatus("workflow", undefined);
-      ctx.ui.setWidget("workflow-progress", undefined);
+      ctx.ui.setWidget("workflow-status", undefined);
       
       const tracking = readTracking(ctx.cwd);
       if (tracking) {
@@ -329,18 +339,18 @@ function registerCommands(pi: ExtensionAPI): void {
         writeGlobalTracking(globalTracking);
       }
       
-      ctx.ui.notify("Workflow stopped and cleared", "info");
+      ctx.ui.notify("Workflow stopped", "info");
       
-      return `❌ Workflow '${workflow.slug}' stopped and cleared.\nUI has been reset.\nYou can start a new workflow with /product-workflow-start.`;
+      return `❌ Workflow '${workflow.slug}' stopped.\nUI cleared.\nStart new with /product-workflow-start`;
     }
   });
   
-  // /product-workflow-pause - Pause
+  // /product-workflow-pause
   pi.registerCommand("product-workflow-pause", {
-    description: "Pause the active workflow (keeps state for later).",
+    description: "Pause the Workflow (keeps state for later).",
     handler: async (args, ctx) => {
       const workflow = getActiveWorkflow(ctx.cwd);
-      if (!workflow) return "No active workflow to pause.\nUse /product-workflow-list to see all workflows.";
+      if (!workflow) return "No active Workflow to pause.\nUse /product-workflow-list to see all.";
       
       const tracking = readTracking(ctx.cwd);
       if (tracking) {
@@ -356,15 +366,15 @@ function registerCommands(pi: ExtensionAPI): void {
         writeGlobalTracking(globalTracking);
       }
       
-      if (ctx.ui) ctx.ui.setStatus("workflow", ctx.ui.theme.fg("warning", "⏸ " + workflow.slug + " [PAUSED]"));
+      if (ctx.ui) ctx.ui.setStatus("workflow", ctx.ui.theme.fg("warning", "⏸ " + workflow.slug));
       
-      return `⏸ Workflow '${workflow.slug}' paused.\nState preserved.\nResume with /product-workflow-resume`;
+      return `⏸ Workflow '${workflow.slug}' paused.\nResume with /product-workflow-resume`;
     }
   });
   
-  // /product-workflow-resume - Resume
+  // /product-workflow-resume
   pi.registerCommand("product-workflow-resume", {
-    description: "Resume a paused workflow. Optionally specify slug.",
+    description: "Resume a paused Workflow. Optionally specify slug.",
     handler: async (args, ctx) => {
       const slug = args?.slug;
       const tracking = readTracking(ctx.cwd);
@@ -374,7 +384,7 @@ function registerCommands(pi: ExtensionAPI): void {
       if (!paused && globalTracking) paused = globalTracking.workflows.find(w => w.status === "paused");
       
       if (!paused) {
-        return slug ? `Paused workflow '${slug}' not found.` : "No paused workflow found.\nUse /product-workflow-list to see all workflows.\nOr: /product-workflow-resume slug=my-feature";
+        return slug ? `Paused workflow '${slug}' not found.` : "No paused Workflow.\nUse /product-workflow-list\nOr: /product-workflow-resume slug=my-workflow";
       }
       
       const target = slug ? (tracking?.workflows.find(w => w.slug === slug && w.status === "paused") || globalTracking?.workflows.find(w => w.slug === slug && w.status === "paused")) : paused;
@@ -394,41 +404,36 @@ function registerCommands(pi: ExtensionAPI): void {
       
       updateWorkflowUI(ctx, ctx.cwd);
       
-      return `▶️ Workflow '${target.slug}' resumed.\nCurrent phase: ${PHASE_NAMES[target.currentPhase]}\nProject: ${target.cwd || ctx.cwd}`;
+      return `▶️ Workflow '${target.slug}' resumed.\nStage: ${PHASE_NAMES[target.currentPhase]}`;
     }
   });
   
-  // /product-workflow-status - Show status
+  // /product-workflow-status
   pi.registerCommand("product-workflow-status", {
-    description: "Show current workflow status with progress bar and phase details.",
+    description: "Show current Workflow status.",
     handler: async (args, ctx) => {
       const workflow = getActiveWorkflow(ctx.cwd);
       
       if (!workflow) {
         const global = getActiveWorkflowGlobal();
         if (global) {
-          return `📍 Global workflow: ${global.slug}\nPhase: ${global.currentPhase + 1}/${PHASE_NAMES.length} — ${PHASE_NAMES[global.currentPhase]}\nProject: ${global.cwd}\nStatus: ${global.status}\n\nNavigate to project folder to continue: cd ${global.cwd}`;
+          return `▶️ Workflow: ${global.slug}\nStage: ${PHASE_NAMES[global.currentPhase]}\nProject: ${global.cwd}\n\ncd ${global.cwd} to continue.`;
         }
         
-        return "No active workflow in this project.\n\nStart one with:\n  /product-workflow-start\n  /product-workflow-start @brief.md\n  /product-workflow-start @doc.md \"extra context here\"\n  /product-workflow-start slug=my-feature source=./brief.md\n\nOr check /product-workflow-list for other workflows.";
+        return "No active Workflow.\n\nStart one:\n  /product-workflow-start\n  /product-workflow-start @brief.md\n  /product-workflow-start @doc.md \"extra context\"";
       }
       
-      const pct = Math.round(((workflow.currentPhase + 1) / PHASE_NAMES.length) * 100);
-      const barLen = 20;
-      const filled = Math.round((pct / 100) * barLen);
-      const bar = "█".repeat(filled) + "░".repeat(barLen - filled);
-      
-      const lines: string[] = [`📋 Workflow: ${workflow.slug}`, `Progress: [${bar}] ${pct}%`, `Phase: ${workflow.currentPhase + 1}/${PHASE_NAMES.length} — ${PHASE_NAMES[workflow.currentPhase]}`];
+      const lines: string[] = [`▶️ Workflow: ${workflow.slug}`, `Stage: ${workflow.currentPhase + 1}/${PHASE_NAMES.length} — ${PHASE_NAMES[workflow.currentPhase]}`];
       if (workflow.name !== workflow.slug) lines.push(`Name: ${workflow.name}`);
       if (workflow.source) lines.push(`Source: ${workflow.source}`);
       if (workflow.draftContent) {
-        lines.push("", `Draft Preview:`);
-        lines.push(workflow.draftContent.slice(0, 500) + (workflow.draftContent.length > 500 ? '...' : ''));
+        lines.push("", `Draft preview:`);
+        lines.push(workflow.draftContent.slice(0, 400) + (workflow.draftContent.length > 400 ? '...' : ''));
       }
       
-      lines.push("", "Phases:");
+      lines.push("", "Stages:");
       workflow.phases.forEach((p, i) => {
-        const icon = p.status === "completed" ? "✅" : p.status === "in-progress" ? "🔄" : "⬜";
+        const icon = p.status === "completed" ? "✓" : p.status === "in-progress" ? "▶" : "○";
         const prefix = i === workflow.currentPhase ? "▶ " : "  ";
         lines.push(`${prefix}${icon} ${i + 1}. ${p.name}`);
       });
@@ -437,9 +442,9 @@ function registerCommands(pi: ExtensionAPI): void {
     }
   });
   
-  // /product-workflow-list - List all
+  // /product-workflow-list
   pi.registerCommand("product-workflow-list", {
-    description: "List all workflows in current project and global.",
+    description: "List all Workflows in current project and global.",
     handler: async (args, ctx) => {
       const lines: string[] = [];
       const tracking = readTracking(ctx.cwd);
@@ -447,8 +452,8 @@ function registerCommands(pi: ExtensionAPI): void {
       if (tracking && tracking.workflows.length > 0) {
         lines.push("📁 Current Project:");
         for (const w of tracking.workflows) {
-          const statusIcon = w.status === "in-progress" ? "🔄" : w.status === "paused" ? "⏸" : w.status === "completed" ? "✅" : "⬜";
-          lines.push(`  ${statusIcon} ${w.slug} [${w.status}] — Phase ${w.currentPhase + 1}: ${PHASE_NAMES[w.currentPhase]}`);
+          const icon = w.status === "in-progress" ? "▶" : w.status === "paused" ? "⏸" : w.status === "completed" ? "✓" : "○";
+          lines.push(`  ${icon} ${w.slug} — ${PHASE_NAMES[w.currentPhase]}`);
         }
         lines.push("");
       }
@@ -457,22 +462,22 @@ function registerCommands(pi: ExtensionAPI): void {
       if (globalTracking && globalTracking.workflows.length > 0) {
         const globalOnly = globalTracking.workflows.filter(w => !tracking?.workflows.some(tw => tw.slug === w.slug));
         if (globalOnly.length > 0) {
-          lines.push("🌐 Global (other projects):");
+          lines.push("🌐 Other Projects:");
           for (const w of globalOnly) {
-            const statusIcon = w.status === "in-progress" ? "🔄" : w.status === "paused" ? "⏸" : w.status === "completed" ? "✅" : "⬜";
-            lines.push(`  ${statusIcon} ${w.slug} [${w.status}] — ${PHASE_NAMES[w.currentPhase]}`);
-            lines.push(`     Project: ${w.cwd}`);
+            const icon = w.status === "in-progress" ? "▶" : w.status === "paused" ? "⏸" : w.status === "completed" ? "✓" : "○";
+            lines.push(`  ${icon} ${w.slug} — ${PHASE_NAMES[w.currentPhase]}`);
+            lines.push(`     ${w.cwd}`);
           }
         }
       }
       
-      return lines.length === 0 ? "No workflows found.\nStart one with /product-workflow-start" : lines.join("\n");
+      return lines.length === 0 ? "No Workflows found.\nStart one with /product-workflow-start" : lines.join("\n");
     }
   });
   
-  // /product-workflow-setphase - Set phase
+  // /product-workflow-setphase
   pi.registerCommand("product-workflow-setphase", {
-    description: "Set the current phase of the active workflow. Phase is 0-5: 0=Clarify, 1=Shape, 2=Bet, 3=Build, 4=Critique, 5=Gate",
+    description: "Set current phase. 0=Clarify, 1=Shape, 2=Interface, 3=Critique, 4=Gate, 5=Planning, 6=Execution",
     handler: async (args, ctx) => {
       const phaseArg = args?.phase;
       const phaseName = args?.phasename;
@@ -485,11 +490,11 @@ function registerCommands(pi: ExtensionAPI): void {
       }
       
       if (phase === null || isNaN(phase) || phase < 0 || phase >= PHASE_NAMES.length) {
-        return `Usage: /product-workflow-setphase phase=N  (N is 0-${PHASE_NAMES.length - 1})\nOr: /product-workflow-setphase phasename=Clarify\n\nAvailable phases:\n${PHASE_NAMES.map((name, i) => `  ${i}: ${name}`).join("\n")}`;
+        return `Usage: /product-workflow-setphase phase=N\n\nPhases:\n${PHASE_NAMES.map((name, i) => `  ${i}: ${name}`).join("\n")}`;
       }
       
       const workflow = getActiveWorkflow(ctx.cwd);
-      if (!workflow) return "No active workflow.\nStart one with /product-workflow-start";
+      if (!workflow) return "No active Workflow.\nStart with /product-workflow-start";
       
       const oldPhase = workflow.currentPhase;
       
@@ -520,20 +525,20 @@ function registerCommands(pi: ExtensionAPI): void {
       updateWorkflowUI(ctx, ctx.cwd);
       if (oldPhase !== phase) notifyPhaseChange(ctx, workflow, oldPhase);
       
-      return `📍 Phase set to ${phase}: ${PHASE_NAMES[phase!]}\nProgress: ${phase! + 1}/${PHASE_NAMES.length}\nUI updated.`;
+      return `▶️ Phase set: ${PHASE_NAMES[phase!]} (${phase! + 1}/${PHASE_NAMES.length})\nUI updated.`;
     }
   });
   
-  // /product-workflow-next - Advance phase
+  // /product-workflow-next
   pi.registerCommand("product-workflow-next", {
-    description: "Advance the active workflow to the next phase.",
+    description: "Advance Workflow to next phase.",
     handler: async (args, ctx) => {
       const workflow = getActiveWorkflow(ctx.cwd);
-      if (!workflow) return "No active workflow.\nStart one with /product-workflow-start";
+      if (!workflow) return "No active Workflow.\nStart with /product-workflow-start";
       
       const nextPhase = workflow.currentPhase + 1;
       if (nextPhase >= PHASE_NAMES.length) {
-        return `Workflow '${workflow.slug}' is already on the last phase: ${PHASE_NAMES[workflow.currentPhase]}\nUse /product-workflow-complete to mark as finished.`;
+        return `Workflow '${workflow.slug}' is complete.\nUse /product-workflow-complete to finish.`;
       }
       
       const tracking = readTracking(ctx.cwd);
@@ -562,19 +567,19 @@ function registerCommands(pi: ExtensionAPI): void {
       updateWorkflowUI(ctx, ctx.cwd);
       notifyPhaseChange(ctx, workflow, nextPhase - 1);
       
-      return `✅ Advanced to Phase ${nextPhase + 1}: ${PHASE_NAMES[nextPhase]}\nWorkflow: ${workflow.slug}`;
+      return `✅ Moved to: ${PHASE_NAMES[nextPhase]} (${nextPhase + 1}/${PHASE_NAMES.length})`;
     }
   });
   
-  // /product-workflow-complete - Complete
+  // /product-workflow-complete
   pi.registerCommand("product-workflow-complete", {
-    description: "Mark the active workflow as completed.",
+    description: "Mark Workflow as completed.",
     handler: async (args, ctx) => {
       const workflow = getActiveWorkflow(ctx.cwd);
-      if (!workflow) return "No active workflow to complete.";
+      if (!workflow) return "No active Workflow to complete.";
       
       ctx.ui.setStatus("workflow", undefined);
-      ctx.ui.setWidget("workflow-progress", undefined);
+      ctx.ui.setWidget("workflow-status", undefined);
       
       const tracking = readTracking(ctx.cwd);
       if (tracking) {
@@ -595,23 +600,23 @@ function registerCommands(pi: ExtensionAPI): void {
       
       ctx.ui.notify(`🎉 Workflow '${workflow.slug}' completed!`, "info");
       
-      return `🎉 Workflow '${workflow.slug}' completed!\nAll phases finished.\nProject: ${ctx.cwd}`;
+      return `🎉 Workflow '${workflow.slug}' completed!\nAll stages finished.`;
     }
   });
   
-  // /product-workflow-goto - Go to workflow in another project
+  // /product-workflow-goto
   pi.registerCommand("product-workflow-goto", {
-    description: "Switch to a workflow from another project. Shows instructions to navigate.",
+    description: "Show how to navigate to a Workflow in another project.",
     handler: async (args, ctx) => {
       const slug = args?.slug;
       const globalTracking = readGlobalTracking();
-      if (!globalTracking) return "No global workflows found.";
+      if (!globalTracking) return "No global Workflows found.";
       
       const workflow = slug ? globalTracking.workflows.find(w => w.slug === slug) : globalTracking.workflows.find(w => w.status === "in-progress");
       
-      if (!workflow) return `Workflow '${slug || "active"}' not found.\nUse /product-workflow-list to see all workflows.`;
+      if (!workflow) return `Workflow '${slug || "active"}' not found.\nUse /product-workflow-list to see all.`;
       
-      return `📍 Workflow: ${workflow.slug}\nProject: ${workflow.cwd}\nPhase: ${PHASE_NAMES[workflow.currentPhase]}\n\nTo continue this workflow:\n  1. Navigate: cd ${workflow.cwd}\n  2. Resume: /product-workflow-resume slug=${workflow.slug}\n\nOr the LLM will auto-detect it when you open that project.`;
+      return `📍 Workflow: ${workflow.slug}\nProject: ${workflow.cwd}\nStage: ${PHASE_NAMES[workflow.currentPhase]}\n\nTo continue:\n  1. cd ${workflow.cwd}\n  2. /product-workflow-resume slug=${workflow.slug}`;
     }
   });
 }
@@ -650,7 +655,7 @@ export default function (pi: ExtensionAPI) {
       
       const workflow = getActiveWorkflow(ctx.cwd);
       if (workflow) {
-        ctx.ui.notify(`📍 Resumed: ${workflow.slug} (Phase ${workflow.currentPhase + 1}: ${PHASE_NAMES[workflow.currentPhase]})`, "info");
+        ctx.ui.notify(`▶ Workflow active: ${workflow.slug} (${PHASE_NAMES[workflow.currentPhase]})`, "info");
       } else {
         const globalTracking = readGlobalTracking();
         if (globalTracking) {
@@ -662,18 +667,33 @@ export default function (pi: ExtensionAPI) {
               writeTracking(ctx.cwd, tracking);
             }
             updateWorkflowUI(ctx, ctx.cwd);
-            ctx.ui.notify(`📍 Found workflow: ${projectWorkflow.slug} (Phase ${projectWorkflow.currentPhase + 1}: ${PHASE_NAMES[projectWorkflow.currentPhase]})`, "info");
+            ctx.ui.notify(`▶ Found: ${projectWorkflow.slug} (${PHASE_NAMES[projectWorkflow.currentPhase]})`, "info");
           }
         }
       }
     }
   });
   
-  // 2. Track phase changes
+  // 2. Watch for file changes (skill updates tracking file)
+  pi.on("tool_call", async (event, ctx) => {
+    // Check if write tool was called on tracking file
+    if (event.input?.path && event.input.path.includes(TRACKING_FILE)) {
+      // File was modified - update UI
+      if (ctx.ui) {
+        const workflow = getActiveWorkflow(ctx.cwd);
+        if (workflow) {
+          updateWorkflowUI(ctx, ctx.cwd);
+        }
+      }
+    }
+  });
+  
+  // 3. Check for phase changes on turn end
   pi.on("turn_end", async (_event, ctx) => {
     const workflow = getActiveWorkflow(ctx.cwd);
     if (!workflow || !ctx.ui) return;
     
+    // Check if tracking file was updated (skill may have changed phase)
     const tracking = readTracking(ctx.cwd);
     if (tracking) {
       const current = tracking.workflows.find(w => w.slug === workflow.slug);
@@ -686,7 +706,7 @@ export default function (pi: ExtensionAPI) {
     }
   });
   
-  // 3. Update on agent_end
+  // 4. Update on agent_end
   pi.on("agent_end", async (_event, ctx) => {
     if (!ctx.ui) return;
     const currentWorkflow = getActiveWorkflow(ctx.cwd);

@@ -1,28 +1,65 @@
 # Changelog
 
-All notable changes to this package will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to `@renatocaliari/pi-product-workflow` will be documented in this file.
 
 ## [0.1.0-alpha] - 2026-05-15
 
 ### Added
-- Initial alpha release
-- 15 product skills:
-  - `cali-product-workflow` - Main Shape Up workflow with Interface + Tech Planning + Critique + Gate
-  - `cali-product-short-cycle` - Rapid validation method
-  - `cali-product-opportunity-mapping` - Strategic opportunity analysis
-  - `cali-product-job-to-be-done` - JTBD framework
-  - `cali-product-evolutionary-principles` - Evolutionary product thinking
-  - `cali-product-ads` - Transtheoretical advertising model
-  - `cali-product-business-models` - Business model creativity
-  - `cali-product-health` - Product health monitoring
-  - `cali-product-marketplace-playbook` - Marketplace tactics
-  - `cali-product-open-source` - Open source strategy
-  - `cali-product-pricing` - Pricing strategies
-  - `cali-product-promotions` - MAGIC promotion framework
-  - `cali-product-trust-building` - Trust mechanisms
-- Extension for scaffolding and tracking
-- `cali-product-workflow.json` tracking schema
-- References coupled in each skill
+
+- **15 skills** with `cali-product-*` prefix:
+  - Core: workflow, short-cycle, opportunity-mapping, job-to-be-done, evolutionary-principles, multi-method-market-analysis, scope-executor
+  - Growth: ads, business-models, health, marketplace-playbook, open-source, pricing, promotions, trust-building
+
+- **Extension** with workflow commands:
+  - `/product-workflow-start` - Start workflow (auto-parses @filename and text)
+  - `/product-workflow-stop` - Stop immediately and clear UI
+  - `/product-workflow-pause` - Pause (keeps state)
+  - `/product-workflow-resume` - Resume paused workflow
+  - `/product-workflow-status` - Show current status
+  - `/product-workflow-list` - List all workflows
+  - `/product-workflow-setphase` - Set current phase
+  - `/product-workflow-next` - Advance to next phase
+  - `/product-workflow-complete` - Mark as completed
+  - `/product-workflow-goto` - Navigate to workflow in another project
+
+- **TUI integration**:
+  - Footer status shows current workflow + stage
+  - Widget above editor shows full workflow info
+  - Toast notifications on phase transitions
+  - Auto-update when skill advances phases
+  - Pause/resume visual states
+
+- **7 workflow stages** matching skill phases:
+  - Clarify (Fase 0)
+  - Shape (Fase 1)
+  - Interface (Fase 2)
+  - Critique (Fase 3)
+  - Gate (Fase 4)
+  - Planning (Fase 5)
+  - Execution (Fase 6)
+
+- **Cross-project state**:
+  - Local tracking in project
+  - Global tracking in home directory
+  - Auto-discover workflows when opening projects
+
+- **Smart input parsing**:
+  - `@filename` parsed as source files
+  - Trailing text parsed as draft content
+  - Auto-slug generation from draft or filename
+
+### Changed
+
+- Commands renamed from `/workflow-*` to `/product-workflow-*`
+- Phase names updated to match skill exactly
+- TUI elements now use clear user-facing labels
+
+---
+
+## [0.0.1-alpha] - 2026-05-15
+
+### Added
+
+- Initial alpha release structure
+- Basic extension scaffolding
+- 13 initial skills
