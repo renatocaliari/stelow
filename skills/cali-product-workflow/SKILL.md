@@ -37,16 +37,16 @@ para encontrar o equivalente.
 Mantenha os nomes de package **exatos** — o pi pode ter múltiplas extensões
 com a mesma tool name:
 
-| Tool (referência no fluxo) | Package (npm) | Uso principal |
-|---|---|---|
-| `subagent` | **pi-subagents** (nicobailon) | Delegar tarefas paralelas |
-| `ask_user_question` | **@juicesharp/rpiv-ask-user-question** | Perguntas estruturadas ao usuário |
-| `plannotator annotate --gate` | **@plannotator/pi-extension** (backnotprop) | Revisão visual com gate de aprovação |
-| `/skill:autoresearch-create` | **pi-autoresearch** (davebcn87) | Loop de otimização por métrica |
-| `/sisyphus`, `/goal`, `pause_goal` | **@capyup/pi-goal** | Ordered steps com completion audit |
-| `intercom` | **pi-intercom** (nicobailon) | Comunicação entre sessões pi |
-| `/supervise` | **pi-supervisor** (tintinweb) | Steering de execução contra desvio |
-| `safe-change` | **pi-agent-codebase-workflows** (PriNova) | Verificação de regressão |
+| Tool (referência no fluxo) | Package (npm) | Uso principal | Modos de execução |
+|---|---|---|---|
+| `subagent` | **pi-subagents** (nicobailon) | Delegar tarefas paralelas | `parallel` (tasks[], concurrency), `chain`, `single` |
+| `ask_user_question` | **@juicesharp/rpiv-ask-user-question** | Perguntas estruturadas ao usuário | `single` (sempre) |
+| `plannotator annotate --gate` | **@plannotator/pi-extension** (backnotprop) | Revisão visual com gate de aprovação | `single` (sempre) |
+| `/skill:autoresearch-create` | **pi-autoresearch** (davebcn87) | Loop de otimização por métrica | `single` (executa loop até convergir) |
+| `/sisyphus`, `/goal`, `pause_goal` | **@capyup/pi-goal** | Ordered steps com completion audit | `single` (steps ordenados) |
+| `intercom` | **pi-intercom** (nicobailon) | Comunicação entre sessões pi | `send`, `ask` (com reply) |
+| `/supervise` | **pi-supervisor** (tintinweb) | Steering de execução contra desvio | `single` (track até conclusão) |
+| `safe-change` | **pi-agent-codebase-workflows** (PriNova) | Verificação de regressão | `single` (scan + report) |
 
 > 💡 No texto do workflow, as tools são referidas pelo nome (ex: `subagent`,
 > `plannotator`). Use SEMPRE o package correspondente da tabela acima.
@@ -419,10 +419,27 @@ e documente o que mudou.
 
 ## Fase 2: Interface Brainstorming
 
-Leia \`references/interface/archetypes.md\` (5 arquétipos) e \`references/interface/output-format.md\`.
+Leia \`references/interface/archetypes.md\` (5 arquétipos), \`references/interface/output-format.md\`,
+e cada referência de arquétipo individual para guiar a proposta correspondente.
 
-Gere as 5 propostas (A-E) via subagent \`worker\` (1 prompt, 5 propostas + híbrida):
-- Saída: \`product-workflow/{YYYY-MM-DD}/{_dir}/interfaces/interfaces_{v}.md\`
+**Gere cada proposta individualmente em paralelo** (5 workers independentes):
+
+```typescript
+subagent({
+  tasks: [
+    { agent: "worker", task: `Gere a Proposta A (Arquétipo A — [descrição do arquétipo A do references/interface/archetypes.md]) para [contexto do produto]. Saída markdown em formato de proposta completa com wireframe ASCII, breadboarding e trade-offs.` },
+    { agent: "worker", task: `Gere a Proposta B (Arquétipo B — [descrição do arquétipo B]) para [contexto do produto]. Formato completo.` },
+    { agent: "worker", task: `Gere a Proposta C (Arquétipo C — [descrição do arquétipo C]) para [contexto do produto]. Formato completo.` },
+    { agent: "worker", task: `Gere a Proposta D (Arquétipo D — [descrição do arquétipo D]) para [contexto do produto]. Formato completo.` },
+    { agent: "worker", task: `Gere a Proposta E + Híbrida (Arquétipo E — [descrição do arquétipo E]) para [contexto do produto]. Inclua recomendação híbrida combinando elementos fortes de múltiplos arquétipos. Formato completo.` },
+  ],
+  concurrency: 5,
+  context: "fork"
+})
+```
+
+- Cada worker gera **uma** proposta (independente, sem contaminação entre si)
+- Saída combinada: \`product-workflow/{YYYY-MM-DD}/{_dir}/interfaces/interfaces_{v}.md\`
 - **Não peça input** — gere tudo de uma vez
 
 Após concluir, crie \`spec-product_{v+1}.md\` incorporando a interface escolhida
@@ -602,14 +619,36 @@ Após aprovação, carimbe o spec-tech.md (mesmo procedimento da Fase 4):
 
 **Se pós-Shape-Up:** o gate já rodou na Fase 4 — pule esta etapa.
 
-### 5c. Todo Generation (Step 9)
+### 5c. Goal Generation (Step 9)
 
-Após aprovação do plano técnico, crie tasks para cada escopo:
+Após aprovação do plano técnico, converta cada escopo em um `/sisyphus` goal
+com DoD como completion criteria:
 
-- **pi.dev:** use `todo` tool para criar/atualizar tarefas organizadas por scope
-- **Fusion:** use `fn_task_create` ou o board kanban nativo
+**Para cada scope no spec-tech.md aprovado:**
 
-Organize por: scopes, spikes, rollout stages, dependências.
+```typescript
+// Feature / refactor / spike investigativo → /sisyphus com ordered steps
+/sisyphus Scope: {scope_name}
+
+Steps:
+1. {step 1}
+   Done: {critério}
+2. {step 2}
+   Done: {critério}
+...
+
+DoD: {DoD do scope}
+AC: {acceptance criteria}
+Deps: {dependências entre scopes}
+```
+
+**Scopes optimization/spike com métrica → `/skill:autoresearch-create`**
+(não viram goal, viram loop de experimentos)
+
+**Regras:**
+- Scopes com dependência: crie goal DEPOIS da dependência estar completa
+- Use `pause_goal` com reason se um scope ficar bloqueado
+- `/goal-tweak` para ajustes de escopo durante execução
 
 ---
 
@@ -620,20 +659,38 @@ Organize por: scopes, spikes, rollout stages, dependências.
 
 ### Scope Executor Routing
 
-| Tipo de Scope | Métrica? | Executor |
-|---|---|---|
-| `[TYPE] optimization` | Sim | `/skill:autoresearch-create` |
-| `[EXECUTOR] autoresearch` | Sim | `/skill:autoresearch-create` |
-| Spike com métrica | Sim | `/skill:autoresearch-create` |
-| Feature | Não | `/sisyphus` (ordered steps) |
-| Refatoração sem métrica | Não | `/sisyphus` |
-| Spike investigativo | Não | `/sisyphus` |
-| Interface brainstorming | Não | `/sisyphus` (5 proposals) |
+| Tipo de Scope | Métrica? | Executor | Supervisão |
+|---|---|---|---|
+| `[TYPE] optimization` | Sim | `/skill:autoresearch-create` | Loop de métrica (auto) |
+| `[EXECUTOR] autoresearch` | Sim | `/skill:autoresearch-create` | Loop de métrica (auto) |
+| Spike com métrica | Sim | `/skill:autoresearch-create` | Loop de métrica (auto) |
+| Feature | Não | `/sisyphus` (ordered steps) | `/supervise` com outcome = DoD |
+| Refatoração sem métrica | Não | `/sisyphus` | `/supervise` com outcome = DoD |
+| Spike investigativo | Não | `/sisyphus` | `/supervise` com outcome = DoD |
+| Interface brainstorming | Não | `/sisyphus` (5 proposals) | `/supervise` com outcome = DoD |
 
-**Dicas:** Use `/goal-tweak` para ajustes. Se bloqueado, `pause_goal` com reason.
+### Ao iniciar execução de cada scope:
 
-> `/supervise Executar scopes do spec-tech.md aprovado: [scopes]. Seguir DoD e AC.`
-> Após tech planning, execute `/skill:cali-product-scope-executor`
+1. **Feature/refactor/spike sem métrica → `/sisyphus` + `/supervise`**
+   - Crie o goal com `/sisyphus` (steps ordenados, DoD como completion criteria)
+   - Ative `/supervise` com:
+     ```
+     /supervise outcome="Executar scope '{scope_name}' conforme spec-tech.md.
+     DoD: {DoD}. AC: {acceptance criteria}. Não desviar do escopo aprovado."
+     ```
+   - O supervisor detecta desvio e re-centraliza se o LLM sair do escopo
+
+2. **Optimization/spike com métrica → `/skill:autoresearch-create`**
+   - Não precisa de supervisor (o loop de experimento é auto-supervisionado pela métrica)
+
+3. **Se bloqueado:** `pause_goal` com reason documentando o bloqueio
+
+4. **Ajuste de escopo:** `/goal-tweak` se precisar modificar durante execução
+
+> **Dica:** O `/supervise` é especialmente útil em scopes longos onde o LLM
+> pode esquecer o objetivo original. Ative AO INICIAR o scope, não antes.
+
+Após tech planning, execute `/skill:cali-product-scope-executor`
 
 ---
 
