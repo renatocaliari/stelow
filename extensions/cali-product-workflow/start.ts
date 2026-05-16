@@ -184,5 +184,5 @@ export default async function cmdStart(
 
   reply(ctx, lines.join("\n"));
 
-  pi.sendUserMessage("/skill:cali-product-workflow", { deliverAs: "followUp" });
+  pi.sendUserMessage("/skill:cali-product-workflow\n\n[Auto-Discovery: SKIP — workflow '" + finalSlug + "' recém-criado. Prossiga direto para Fase 1: Clarify.]", { deliverAs: "followUp" });
 }
