@@ -1,5 +1,7 @@
 ## Phase 8: Supervisor + Execution
 
+> **Part of cali-product-workflow** — See [`SKILL.md`](../SKILL.md) for phase sequence, safety rules, and capability reference.
+
 ### ⚠️ Activate the supervisor ONLY during execution
 **Never activate during Phases 3-7.** The supervisor would re-submit Plannotator.
 

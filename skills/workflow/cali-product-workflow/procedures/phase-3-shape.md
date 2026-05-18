@@ -1,5 +1,7 @@
 ## Phase 3: Shape Up Planning
 
+> **Part of cali-product-workflow** — See [`SKILL.md`](../SKILL.md) for phase sequence, safety rules, and capability reference.
+
 ### 1a. Parallel Recon (optional — recommended for complex features)
 
 Before shaping, launch `subagent` to map context:

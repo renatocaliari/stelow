@@ -1,5 +1,7 @@
 ## Phase 6: Review Gate
 
+> **Part of cali-product-workflow** — See [`SKILL.md`](../SKILL.md) for phase sequence, safety rules, and capability reference.
+
 ### 6x. Claim Verification (before the Gate)
 
 **BEFORE submitting to Plannotator**, run claim verification:

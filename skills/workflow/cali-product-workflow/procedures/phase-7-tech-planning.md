@@ -1,5 +1,7 @@
 ## Phase 7: Tech Planning Sequencing
 
+> **Part of cali-product-workflow** — See [`SKILL.md`](../SKILL.md) for phase sequence, safety rules, and capability reference.
+
 ### 7a. Scope Generation
 
 Read `references/tech-planning/` (TECH-CONTEXT.md, SCOPES-AND-SEQUENCING.md, TECH-OUTPUT.md, generation-principles.md) and launch subagent:

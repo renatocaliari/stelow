@@ -1,5 +1,7 @@
 ## Phase 4: Interface Brainstorming
 
+> **Part of cali-product-workflow** — See [`SKILL.md`](../SKILL.md) for phase sequence, safety rules, and capability reference.
+
 Read \`references/interface/archetypes.md\` (5 archetypes), \`references/interface/output-format.md\`,
 and each individual archetype reference to guide the corresponding proposal.
 

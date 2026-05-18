@@ -1,5 +1,7 @@
 ## Phase 5: Plan Critique
 
+> **Part of cali-product-workflow** — See [`SKILL.md`](../SKILL.md) for phase sequence, safety rules, and capability reference.
+
 ### 5a. Analysis via subagent
 
 Launch subagent with checklists from `references/plan-critique/`:

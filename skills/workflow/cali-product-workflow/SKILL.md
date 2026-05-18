@@ -79,7 +79,8 @@ In Phase 2 (Strategic Context), the user can choose strategic analyses **in para
 | **Short-Cycle Product** | `cali-product-short-cycle` | Experiment plan, metrics, pricing |
 
 All execute **concurrently** via `subagent({tasks: [...], concurrency: N})`.
-See `procedures/phase-2-context.md`.
+See `procedures/phase-2-context.md` for the full flow — the LLM offers these to the user
+and invokes the selected ones via subagent.
 
 ---
 
@@ -99,8 +100,11 @@ The LLM loads them automatically when detecting relevance in the user's request 
 | **Promotions** | `cali-product-promotions` | MAGIC framework, 4 launch strategies |
 | **Trust Building** | `cali-product-trust-building` | 10 pillars, guarantees, perception |
 
-When signaled, the LLM uses `ask_user_question({ multiSelect: true, options: [...] })` to offer these.
+When signaled, the LLM uses `ask_user_question({ multiSelect: true, options: [...] })` to offer these
+(see `procedures/phase-2-context.md` for domain detection and routing).
 If the user's request is purely domain-specific (e.g., "help me define pricing"), the flow may route directly to that skill instead of proceeding to Shape Up.
+
+Selected libraries are loaded via `subagent` or read directly during planning.
 
 ---
 
