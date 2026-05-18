@@ -1,6 +1,6 @@
-## Phase 4: Review Gate
+## Phase 6: Review Gate
 
-### 4x. Claim Verification (before the Gate)
+### 6x. Claim Verification (before the Gate)
 
 **BEFORE submitting to Plannotator**, run claim verification:
 
@@ -40,9 +40,9 @@ grep -E '\`[^\`]+:[0-9]+\`' .cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spe
 
 ⚠️ **SAFETY RULES — DO NOT SKIP:**
 1. **Verbal approval in chat does NOT replace the gate.** Even if the user says "approved", "go ahead" — run the command BELOW for formal registration.
-2. **Plannotator with --gate is MANDATORY.** Only proceed to Phase 5 AFTER "approved".
+2. **Plannotator with --gate is MANDATORY.** Only proceed to Phase 7 AFTER "approved".
 3. If the reviewer requests changes, adjust and re-submit.
-4. After approval, spec-product.md is frozen. **IMPORTANT:** Phase 4 ends with approved:true + receipt. Only proceed to Phase 5 after stamping. Any subsequent edit requires `spec-product_{v+1}.md` and a new gate.
+4. After approval, spec-product.md is frozen. **IMPORTANT:** Phase 6 ends with approved:true + receipt. Only proceed to Phase 7 after stamping. Any subsequent edit requires `spec-product_{v+1}.md` and a new gate.
 
 Submit the revised spec-product.md for approval:
 ```bash

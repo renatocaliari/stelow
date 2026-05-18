@@ -1,4 +1,4 @@
-## Phase 1: Shape Up Planning
+## Phase 3: Shape Up Planning
 
 ### 1a. Parallel Recon (optional — recommended for complex features)
 
@@ -43,7 +43,7 @@ Use `ask_user_question` for strategic questions when needed.
 
 After shaping:
 - Save to `.cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spec-product_{v}.md`
-- Do not ask about Interface Brainstorming — already decided in Phase 0
+- Do not ask about Interface Brainstorming — already decided in Phase 1 (Setup)
 
 ### 1c. Scope Adjustment (after Shape Up)
 

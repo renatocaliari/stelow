@@ -1,7 +1,7 @@
-## Phase 6: Supervisor + Execution
+## Phase 8: Supervisor + Execution
 
 ### ⚠️ Activate the supervisor ONLY during execution
-**Never activate during Phases 1-5.** The supervisor would re-submit Plannotator.
+**Never activate during Phases 3-7.** The supervisor would re-submit Plannotator.
 
 ### 6a. Git Worktree Check (before executing scopes)
 

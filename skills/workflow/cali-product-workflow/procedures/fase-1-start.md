@@ -1,6 +1,6 @@
-## Phase 0: Initial Questions
+## Phase 1: Project Setup
 
-### 0x. Auto-Discovery Check (before anything else)
+### 1a. Auto-Discovery Check (before anything else)
 
 **BEFORE asking anything to the user**, verify the directory structure exists:
 
@@ -82,7 +82,7 @@ ask_user_question({
 ```
 
 **If new workflow**:
-1. Continue to 0a. Workflow Steps normally
+1. Continue to 1b. Stage Selection normally
 
 ### Resume Mechanics (when [RESUME] is present)
 
@@ -126,23 +126,24 @@ After identifying the workflow:
 
 4. **Map artifacts to completed phases**:
    - Approval in `.plannotator/approvals/` → that phase's gate has passed
-   - `spec-product.md` exists → Phase 1 (Shape) completed
-   - `interfaces.md` exists → Phase 2 (Interface) completed
-   - `critique-report.md` exists → Phase 3 (Critique) completed
-   - `spec-tech.md` exists and approved → Phase 5 (Planning) completed
+   - `spec-product.md` exists → Phase 3 (Shape) completed
+   - `interfaces.md` exists → Phase 4 (Interface) completed
+   - `critique-report.md` exists → Phase 5 (Critique) completed
+   - `spec-tech.md` exists and approved → Phase 7 (Planning) completed
 
 5. **Determine resume point**:
-   - If `current_phase_index` is 0 → start from Phase 0a
+   - If `current_phase_index` is 0 → start from Phase 1a (Setup)
+   - If `current_phase_index` is 1 → start from Phase 2a (Strategic Context)
    - If checkpoint has `phase == current_phase_index` → jump to `checkpoint.step`
    - If checkpoint has `phase < current_phase_index` → previous phase is done; start current phase
    - If no checkpoint → start current phase from beginning
-   - If `current_phase_index >= 5` and spec-tech approved → skip to Phase 6
+   - If `current_phase_index >= 6` and spec-tech approved → skip to Phase 8 (Execution)
 
 6. **DO NOT re-ask answered questions.** Use `user_choices` from checkpoint.
 
 7. **Jump to the determined phase** and execute normally. Do not recreate existing artifacts.
 
-### 0a. Workflow Steps
+### 1b. Stage Selection
 
 Ask the user about workflow stages AND about safe-change:
 
@@ -190,124 +191,10 @@ Select the desired stages:`,
 **If user chooses "Yes" for safe-change:**
 Run \`safe-change\` from **pi-agent-codebase-workflows** (PriNova) BEFORE proceeding.
 
-**If user chooses "No":** proceed directly to Phase 0b.
+**If user chooses "No":** proceed directly to Phase 2 (Strategic Context).
 
-**If user selects no workflow option:** proceed to Phase 0c (domain detection may offer direct skill routing),
+**If user selects no workflow option:** proceed to Phase 2b (domain detection may offer direct skill routing),
 but safe-change is still offered.
-
-### 0b. Strategic Exploration (always ask)
-
-**ALWAYS ask** — read the Strategic Approaches section in the main SKILL.md for details.
-
-```typescript
-ask_user_question({
-  questions: [{
-    question: `Before planning, would you like to explore strategic directions?
-Each approach below generates inputs that feed into Shape Up.
-Recommendation: [justification based on project context].`,
-    header: "Strategy",
-    multiSelect: true,
-    options: [
-      {
-        label: "Jobs To Be Done (JTBD)",
-        description: "Map functional, emotional and social jobs the user hires for. Generates contextual segmentation and desired outcomes."
-      },
-      {
-        label: "Evolutionary Principles",
-        description: "Explore innovation via stepping-stones, novelty search and optionality. Useful when the path is not obvious."
-      },
-      {
-        label: "Opportunity Mapping",
-        description: "Map problem opportunities with ranked solutions. Generates a prioritized opportunity map."
-      },
-      {
-        label: "Market Analysis",
-        description: "PESTLE, Foresight, Wardley Maps. Useful for understanding competition, trends and positioning."
-      },
-      {
-        label: "Short-Cycle Product",
-        description: "Quick idea validation with short learning cycles. Ideal for unvalidated hypotheses."
-      },
-    ]
-  }]
-})
-```
-
-**If user selects one or more approaches:**
-1. Read `references/strategic-exploration.md` for each approach's details
-2. Execute the selected ones **in parallel** via subagent:
-```typescript
-subagent({
-  tasks: selectedApproaches.map(approach => ({
-    agent: "delegate",
-    task: `Execute the analysis using the corresponding skill for the context: [project context].
-Use the skill: cali-product-${approach.skill}
-Save results to .cali-product-workflow/{YYYY-MM-DD}/{_dir}/strategic/${approach.name}.md`,
-    output: `.cali-product-workflow/{YYYY-MM-DD}/{_dir}/strategic/${approach.name}.md`,
-    context: "fork"
-  })),
-  concurrency: selectedApproaches.length // all in parallel
-})
-```
-3. Consolidate into `strategic-insights.md`
-4. Incorporate outputs as Shape Up input
-
-**If nothing selected:** proceed directly to Phase 0c.
-
-### 0c. Domain Context Detection (conditional — LLM-driven)
-
-**After Phase 0a and 0b**, the LLM analyzes the user's original request for **domain signals**:
-
-| Sinal no Input do Usuário | Domínio | Skill |
-|---|---|---|
-| "preço", "precificar", "quanto cobrar", "subscription", "assinatura" | Pricing | `cali-product-pricing` |
-| "lançar", "promoção", "black friday", "cupom", "desconto" | Promotions | `cali-product-promotions` |
-| "anúncio", "facebook ads", "google ads", "tráfego pago", "mídia paga" | Ads | `cali-product-ads` |
-| "confiança", "garantia", "prova social", "credibilidade" | Trust | `cali-product-trust-building` |
-| "modelo de negócio", "receita", "monetizar", "como ganhar dinheiro" | Business Models | `cali-product-business-models` |
-| "open source", "código aberto", "community edition" | Open Source | `cali-product-open-source` |
-| "saúde do produto", "métricas de produto", "vício", "bem-estar" | Health | `cali-product-health` |
-| "marketplace", "marketplace supply", "marketplace demand" | Marketplace | `cali-product-marketplace-playbook` |
-
-**Two detection modes:**
-
-**Mode A — Purely domain-specific request** (user asks only about a domain topic):
-The user's request is exclusively about one of these domains (e.g., "help me define a pricing strategy").
-→ Route directly to the detected skill. Do NOT proceed to Shape Up.
-→ The user can always choose to continue to Shape Up afterwards.
-
-**Mode B — General product request with domain overlap** (user asks for product planning but mentions domains):
-The user wants full product planning but the input also contains domain signals.
-→ Offer domain libraries as **complementary context** using `ask_user_question`:
-
-```typescript
-ask_user_question({
-  questions: [{
-    question: `Seu pedido menciona áreas específicas. Deseja carregar playbooks de referência para enriquecer o planejamento?
-Cada playbook fornece frameworks e referências sobre o domínio.`,
-    header: "Domain Libraries",
-    multiSelect: true,
-    options: [
-      // Only include options for detected domains, e.g.:
-      // {
-      //   label: "Pricing",
-      //   description: "Exchange base, consumption control, interest alignment, perception techniques"
-      // },
-      // {
-      //   label: "Promotions",
-      //   description: "MAGIC framework, Loss Leader, Gift Card Sale, Limited Package"
-      // },
-      // ... (only the detected ones)
-    ]
-  }]
-})
-```
-
-**If user selects libraries:**
-1. Load the selected skill(s) content as additional context
-2. Proceed to Phase 1 (Shape Up) with domain context enriched
-
-**If nothing detected or user declines:** proceed directly to Phase 1 (if 0a had selections) or end.
 
 ### Auto-chaining rules
 
@@ -316,7 +203,7 @@ Cada playbook fornece frameworks e referências sobre o domínio.`,
 | Shape Up only | Shape Up → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
 | Interface only | Interface Brain. → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
 | Shape Up + Interface | Shape Up → Interface Brain. → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
-| Tech Planning only | Tech Planning (with own **Review Gate**) → Execution |
+| Tech Planning only | Tech Planning (with its own **Review Gate**) → Execution |
 | Shape Up + Tech Planning | Shape Up → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
 | All | Shape Up → Interface Brain. → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
 

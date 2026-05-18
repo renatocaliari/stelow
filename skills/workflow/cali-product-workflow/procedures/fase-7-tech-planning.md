@@ -1,6 +1,6 @@
-## Phase 5: Tech Planning Sequencing
+## Phase 7: Tech Planning Sequencing
 
-### 5a. Scope Generation
+### 7a. Scope Generation
 
 Read `references/tech-planning/` (TECH-CONTEXT.md, SCOPES-AND-SEQUENCING.md, TECH-OUTPUT.md, generation-principles.md) and launch subagent:
 
@@ -32,7 +32,7 @@ Input: `.cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spec-product_{v}.md`
 head -10 ...spec-product_{v}.md | grep "approved:"
 ```
 - ✅ `approved: true` → proceed
-- ❌ No `approved: true` → **GO BACK to Phase 4. Do not proceed.**
+- ❌ No `approved: true` → **GO BACK to Phase 6. Do not proceed.**
   This check is **deterministic** — does not depend on memory.
 
 ### 5b. Conditional Review Gate
@@ -43,7 +43,7 @@ head -10 ...spec-product_{v}.md | grep "approved:"
 plannotator annotate .cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spec-tech_{v}.md --gate
 ```
 
-After approval, stamp spec-tech.md (same procedure as Phase 4):
+After approval, stamp spec-tech.md (same procedure as Phase 6):
 1. Add to YAML frontmatter:
    ```yaml
    approved: true
@@ -61,7 +61,7 @@ After approval, stamp spec-tech.md (same procedure as Phase 4):
    ```
 3. spec-tech.md is frozen. Future revisions create `spec-tech_{v+1}.md`.
 
-**If post-Shape-Up:** the gate already ran in Phase 4 — skip this step.
+**If post-Shape-Up:** the gate already ran in Phase 6 — skip this step.
 
 ### 5c. Goal Generation (Step 9)
 

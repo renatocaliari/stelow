@@ -183,7 +183,7 @@ cp ~/Development/pi-product-workflow/AGENTS.md ~/.pi/agent/AGENTS.md
         │   └── scopes/
         ├── critiques/            # Plan critique reports
         │   └── critique-report_v{N}.md
-        ├── strategic/            # Strategic analysis outputs (Phase 0b)
+        ├── strategic/            # Strategic analysis outputs (Phase 2a)
         │   ├── jtbd-analysis.md
         │   ├── evolutionary-analysis.md
         │   ├── opportunity-map.md

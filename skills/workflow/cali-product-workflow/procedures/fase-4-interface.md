@@ -1,4 +1,4 @@
-## Phase 2: Interface Brainstorming
+## Phase 4: Interface Brainstorming
 
 Read \`references/interface/archetypes.md\` (5 archetypes), \`references/interface/output-format.md\`,
 and each individual archetype reference to guide the corresponding proposal.

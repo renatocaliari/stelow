@@ -143,7 +143,7 @@ export default async function cmdStart(
     updated_at: new Date().toISOString(),
     name: finalName, _dir: dirHash,
     workflow_status: "in-progress",
-    current_phase: "clarify", current_phase_index: 0,
+    current_phase: "setup", current_phase_index: 0,
     artifacts: {}, approved: false, approved_at: null,
     draft: fullDraft ? truncateText(fullDraft, 10000) : undefined,
     sources,

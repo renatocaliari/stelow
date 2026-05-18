@@ -1,6 +1,6 @@
-## Phase 3: Plan Critique
+## Phase 5: Plan Critique
 
-### 3a. Analysis via subagent
+### 5a. Analysis via subagent
 
 Launch subagent with checklists from `references/plan-critique/`:
 

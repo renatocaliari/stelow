@@ -68,13 +68,13 @@ pi-product-workflow/
 ├── skills/
 │   ├── workflow/                    # 1 orchestrator
 │   │   └── cali-product-workflow/
-│   ├── strategic-analysis/          # 5 exploration skills (Phase 0b)
+│   ├── strategic-analysis/          # 5 exploration skills (Phase 2a)
 │   │   ├── cali-product-job-to-be-done/
 │   │   ├── cali-product-evolutionary-principles/
 │   │   ├── cali-product-opportunity-mapping/
 │   │   ├── cali-product-multi-method-market-analysis/
 │   │   └── cali-product-short-cycle/
-│   ├── domain-libraries/            # 8 tactical playbooks (Phase 0c)
+│   ├── domain-libraries/            # 8 tactical playbooks (Phase 2b)
 │   │   ├── cali-product-ads/
 │   │   ├── cali-product-business-models/
 │   │   ├── cali-product-health/

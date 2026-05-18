@@ -1,7 +1,7 @@
-# Strategic Exploration (Phase 0b)
+# Strategic Exploration (Phase 2a)
 
 ⚠️ **Read this file only when the user shows interest in strategic exploration.**
-Otherwise, skip straight to Phase 1.
+Otherwise, proceed to the next phase (2b or 3).
 
 ---
 
@@ -94,4 +94,4 @@ ask_user_question({
    - Inject as context
    - Add sections to spec-product.md (e.g. `## Considered Jobs`)
 
-If user selects nothing → skip to Phase 1.
+If user selects nothing → proceed to Phase 2b (Domain Libraries).
