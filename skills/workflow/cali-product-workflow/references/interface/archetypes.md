@@ -136,4 +136,4 @@ E optimizes for fluency.
 They are not interchangeable.
 
 ---
-**Nota:** Este arquivo contém os 5 arquétipos A-E completos para brainstorming de interface.
+**Note:** This file contains all 5 archetypes A-E for interface brainstorming.

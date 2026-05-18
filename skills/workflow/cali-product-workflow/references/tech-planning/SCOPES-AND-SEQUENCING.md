@@ -13,7 +13,7 @@ Cada scope deve explicitar a decomposição por camadas para reduzir gap entre p
 ### [LAYERS]
 ```yaml
 [LAYERS]
-  domain:    { Descrição do domínio: lifecycle, state, invariants }
+  domain:    { Domain description: lifecycle, state, invariants }
   data:      { Schema, tabelas, caches }
   api:       { Endpoints REST/gRPC, contratos }
   ui:        { Componentes, telas, fluxos }
@@ -27,10 +27,10 @@ Cada scope deve explicitar a decomposição por camadas para reduzir gap entre p
 ````
 
 ### [CAN-DEPLOY-INDEPENDENTLY]
-- `true`: Scope pode ser deployado sem outros scopes
-- `false`: Depende de outros scopes para funcionar
+- `true`: Scope can be deployed independently without other scopes
+- `false`: Depends on other scopes to function
 
-### Exemplo Completo
+### Complete Example
 ```yaml
 [SCOPE-1] Authentication Foundation
 [TYPE] feature
@@ -74,7 +74,7 @@ If a scope has both feature and optimization aspects, split it into two scopes o
 [SCOPE-4]
 [TYPE] feature
 [EXECUTOR] autoresearch
-[METRIC] Complexidade ciclomática média < 10 (lower is better)
+[METRIC] Average cyclomatic complexity < 10 (lower is better)
 ```
 
 ### Rule: when to add `[EXECUTOR] autoresearch`

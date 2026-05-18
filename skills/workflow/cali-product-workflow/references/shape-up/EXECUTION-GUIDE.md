@@ -53,7 +53,7 @@ The user should review and approve there first.
 ```
 docs/{YYYY-MM-DD}/{slug}/plans/spec-product_{v}.md
 ```
-- `{slug}` é kebab-case (ex: `login-system`)
+- `{slug}` is kebab-case (e.g. `login-system`)
 - `{v}` auto-incrementado
 
 ### Guidelines:

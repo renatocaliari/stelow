@@ -87,7 +87,7 @@ When `question` tool is not available, use enumerated text in chat (A/B/C/D or 1
 This skill is based on the e-book **"Guia para criar produtos com aprendizado em ciclos curtos"** (Guide to Creating Products with Short Learning Cycles) by **Renato Caliari**.
 
 **Author**: Renato Caliari  
-**Substack**: [Roteiro Prático para Validar Ideias](https://calirenato82.substack.com/p/roteiro-pratico-para-validar-ideias)  
+**Substack**: [Practical Guide to Validate Ideas](https://calirenato82.substack.com/p/roteiro-pratico-para-validar-ideias)  
 **GitHub**: [@renatocaliari](https://github.com/renatocaliari)
 
 This skill was translated and adapted by permission and attribution to the original author.
@@ -100,29 +100,18 @@ This skill was translated and adapted by permission and attribution to the origi
 
 ## Extended Deep-Dives (Optional)
 
-Para análise especializada, estas skills standalone estão disponíveis em [github.com/renatocaliari/agent-sync-public](https://github.com/renatocaliari/agent-sync-public/tree/main/skills):
+For specialized analysis, these standalone skills are available at [github.com/renatocaliari/agent-sync-public](https://github.com/renatocaliari/agent-sync-public/tree/main/skills):
 
-| Skill | Descrição | Linhas |
+| Skill | Description | Lines |
 |-------|-----------|--------|
-| `cali-product-health` | Monitoramento de saúde do produto via signals in tension | ~100 |
-| `cali-product-pricing` | Estratégia de precificação: Exchange Base, Consumption Control, Interest Alignment, Trust Pact | ~100 |
-| `cali-product-open-source` | OSS como estratégia de negócio: Proprietary Problem, Org Structures, Competition Protection | ~60 |
-| `cali-product-marketplace-playbook` | 19 tactics de supply & demand, micro products, 5 solution types | ~100 |
+| `cali-product-health` | Product health monitoring via signals in tension | ~100 |
+| `cali-product-pricing` | Pricing strategy: Exchange Base, Consumption Control, Interest Alignment, Trust Pact | ~100 |
+| `cali-product-open-source` | OSS as business strategy: Proprietary Problem, Org Structures, Competition Protection | ~60 |
 | `cali-product-trust-building` | 10 pillars of trust, guarantees, perception, commitment | ~60 |
 | `cali-product-promotions` | MAGIC framework, 4 launch strategies, bonuses | ~60 |
 | `cali-product-business-models` | Cost reduction & revenue generation models | ~80 |
-| `cali-product-ads` | 5 estágios de awareness, ad categories | ~50 |
+| `cali-product-ads` | 5 awareness stages, ad categories | ~50 |
 
-**Instalar (se ainda não tiver):**
-```bash
-npx skills add renatocaliari/agent-sync-public/cali-product-health
-npx skills add renatocaliari/agent-sync-public/cali-product-pricing
-npx skills add renatocaliari/agent-sync-public/cali-product-open-source
-npx skills add renatocaliari/agent-sync-public/cali-product-marketplace-playbook
-npx skills add renatocaliari/agent-sync-public/cali-product-trust-building
-npx skills add renatocaliari/agent-sync-public/cali-product-promotions
-npx skills add renatocaliari/agent-sync-public/cali-product-business-models
-npx skills add renatocaliari/agent-sync-public/cali-product-ads
-```
-
-**Nota:** Estas são enhancements opcionais. O core method funciona sem elas — as references/ contêm todo o conteúdo necessário.
+**Install (if you don't have it yet):**
+...
+**Note:** These are optional enhancements. The core method works without them — the references/ contain all the necessary content.

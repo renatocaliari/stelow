@@ -8,7 +8,7 @@ credits: https://github.com/impeccablehq/impeccable
 
 # Audit Dimensions
 
-5 dimensões para avaliação técnica de qualidade.
+5 dimensions for technical quality assessment.
 
 ## 1. Accessibility (A11y)
 

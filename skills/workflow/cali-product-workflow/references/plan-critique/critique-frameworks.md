@@ -8,7 +8,7 @@ credits: https://github.com/impeccablehq/impeccable
 
 # Critique Frameworks
 
-Frameworks para avaliação UX/design, usados pelo critique skill.
+Frameworks for UX/design evaluation, used by the critique skill.
 
 ---
 

@@ -78,23 +78,23 @@ Build an execution plan respecting dependencies: scopes with no dependencies run
 
 ### Step 2b: Resolve executor per scope
 
-Para cada scope no plano:
-1. Verifique se há `[EXECUTOR]` explícito
-2. Se SIM → ignore o `[TYPE]`, use o executor especificado
-3. Se NÃO → use o routing padrão por tipo
+For each scope in the plan:
+1. Check if there is an explicit `[EXECUTOR]`
+2. If YES → ignore `[TYPE]`, use the specified executor
+3. If NO → use default routing by type
 
-| `[TYPE]` | `[EXECUTOR]` | Resultado |
+| `[TYPE]` | `[EXECUTOR]` | Result |
 |---|---|---|
-| `feature` | *ausente* → worker |
-| `feature` | `autoresearch` → **autoresearch** (override) |
-| `optimization` | *ausente* → autoresearch |
+| `feature` | *absent* → worker |
+| `feature` | `research` → **research loop** (override) |
+| `optimization` | *absent* → research loop |
 | `optimization` | `worker` → **worker** (override) |
-| `spike` | *ausente* → scout + researcher |
-| `spike` | `autoresearch` → **autoresearch** (override, raro) |
+| `spike` | *absent* → scout + researcher |
+| `spike` | `research` → **research loop** (override, rare) |
 
 ### Step 2c: Report the execution plan
 
-Before executing, present a clear execution plan to the user com o executor já resolvido:
+Before executing, present a clear execution plan to the user with the resolved executor:
 
 ```
 📋 Execution Plan for: {plan-name}
@@ -102,7 +102,7 @@ Before executing, present a clear execution plan to the user com o executor já 
 Phase 1 (parallel):
   ⏩ [SCOPE-1] Login — feature → worker
   ⏩ [SCOPE-3] Vector DB eval — spike → scout + researcher
-  ⏩ [SCOPE-4] Refatorar pagamentos — feature → autoresearch (override)
+  ⏩ [SCOPE-4] Refactor payments — feature → autoresearch (override)
 
 Phase 2 (after SCOPE-1):
   ⏩ [SCOPE-2] Search optimization — optimization → autoresearch
@@ -118,7 +118,7 @@ If the user says yes, proceed autonomously. If no, ask what they'd like to adjus
 
 ### Step 3: Execute feature scopes (feature → worker)
 
-Para cada scope com executor resolvido = `worker` (seja por default do tipo feature ou por override [EXECUTOR] worker):
+For each scope with resolved executor = `worker` (whether by default for feature type or by [EXECUTOR] worker override):
 
 1. **Spawn worker** with the scope's DoD and ACs as the task:
    ```typescript
@@ -138,15 +138,15 @@ Para cada scope com executor resolvido = `worker` (seja por default do tipo feat
      tasks: [
        { agent: "reviewer", task: "Review diff for correctness and regressions", output: false },
        { agent: "reviewer", task: "Review diff for simplicity and code quality:
-- KISS: é a solução mais simples possível?
-- DRY: há duplicação que deveria ser extraída?
-- Nenhuma função > 50 linhas
-- Nenhum arquivo > 400 linhas
-- Complexidade ciclomática baixa (max 3 níveis de indentação)
-- Se for Go + Datastar: Locality of Behavior seguido? (data-* attributes no componente, zero JS solto)
-- Se for React/Vue/Svelte: Separation of Concerns seguido? (lógica extraída do template)
+   - KISS: is this the simplest possible solution?
+   - DRY: is there duplication that should be extracted?
+   - No function > 50 lines
+   - No file > 400 lines
+   - Low cyclomatic complexity (max 3 indentation levels)
+   - If Go + Datastar: Locality of Behavior followed? (data-* attributes on component, zero loose JS)
+   - If React/Vue/Svelte: Separation of Concerns followed? (logic extracted from template)
 
-Reporte violações como sugestões — o worker deve corrigir.", output: false }
+   Report violations as suggestions — the worker should fix them.", output: false }
      ],
      concurrency: 2,
      context: "fresh"
@@ -154,42 +154,39 @@ Reporte violações como sugestões — o worker deve corrigir.", output: false 
    ```
 3. **Apply feedback:** synthesize reviewer findings and apply fixes worth doing now
 4. **If the scope involves UI/visual changes**, run quality checks:
-   - `/skill:audit` — accessibility (WCAG POUR), performance, theming, anti-patterns. Carregue a skill antes de usar.
-   - `/skill:critique` — design review (heuristics, cognitive load, AI slop detection). Carregue a skill antes de usar.
+   - Load audit skill — accessibility (WCAG POUR), performance, theming, anti-patterns.
+   - Load critique skill — design review (heuristics, cognitive load, AI slop detection).
    
-   Use-as diretamente — não dependem de outras skills de design.
+   Use them directly — they don't depend on other design skills.
 5. **Mark scope as complete** and move to the next
 
-### Step 4: Execute optimization scopes (optimization → autoresearch)
+### Step 4: Execute optimization scopes (optimization → research loop)
 
-Para cada scope com executor resolvido = `autoresearch` (seja por default do tipo optimization ou por override [EXECUTOR] autoresearch):
+For each scope with resolved executor = `research loop` (whether by default for optimization type or by [EXECUTOR] research override):
 
-1. **Check if autoresearch is already set up** for this scope (look for existing `autoresearch.md` with matching metric)
-2. **If not set up, launch autoresearch setup:**
+1. **Check if research loop is already set up** for this scope (look for existing research config with matching metric)
+2. **If not set up, launch research loop setup:**
    ```typescript
    subagent({
      agent: "delegate",
-     task: `Setup autoresearch for optimization scope [SCOPE-X]:
+     task: `Setup research loop for optimization scope [SCOPE-X]:
    Objective: {objective}
    Command: {infer from metric or use plan's suggested command}
    Metric: {metric name} ({unit}, {direction} is better)
    Files in scope: {from plan}
-   Constraints: {from plan, e.g. tests must pass}
-   Use /skill:autoresearch-create and configure the loop.
-   Once configured, let it run autonomously.`,
+   Constraints: {from plan, e.g. tests must pass}`,
      context: "fork"
    })
    ```
-3. **Set a stopping condition.** Autoresearch loops forever by default. Set `maxIterations` in `autoresearch.config.json` or define a target:
-   - If metric target is defined in the plan (e.g., `API P95 latency < 200ms`): stop when target is met
+3. **Set a stopping condition.** Research loops forever by default. Set max iterations or define a target:
+   - If metric target is defined in the plan: stop when target is met
    - If no target: run for a reasonable number of iterations (10-20) or until improvements plateau
-   - Use the autoresearch widget/dashboard to monitor progress
-4. **When autoresearch completes** (target met or iterations exhausted), run `parallel-review` on the optimization changes
+4. **When research completes** (target met or iterations exhausted), run parallel review on the changes
 5. **Mark scope as complete**
 
 ### Step 5: Execute spike scopes (spike → scout + researcher)
 
-Para cada scope com executor resolvido = `scout` (seja por default do tipo spike ou por [EXECUTOR] scout):
+For each scope with resolved executor = `scout` (whether by default for spike type or by [EXECUTOR] scout override):
 
 1. **Run parallel investigation:**
    ```typescript
@@ -215,17 +212,17 @@ Para cada scope com executor resolvido = `scout` (seja por default do tipo spike
 
 ### Step 7: Compliance Check
 
-Antes de gerar o relatório final, cruze o plano original (spec-tech.md) com o que foi executado:
+Before generating the final report, cross-reference the original plan (spec-tech.md) with what was executed:
 
-1. **Cobertura:** todo scope do spec-tech.md foi executado?
-   - Se algum scope foi pulado: documente o motivo no relatório
-   - Se scopes extras foram criados: documente a justificativa
-2. **DoD:** cada scope executado atingiu seu Definition of Done original?
-   - Se não: documente o gap
-3. **Princípios:** leia `references/tech-planning/generation-principles.md`
-   e verifique se os princípios foram seguidos no código gerado
-   - Se violações foram detectadas pelo parallel-review: foram corrigidas?
-4. **Resultado da verificação:** APROVADO | RESSALVAS | REPROVADO
+1. **Coverage:** was every scope in spec-tech.md executed?
+   - If a scope was skipped: document the reason
+   - If extra scopes were created: document the justification
+2. **DoD:** did each executed scope meet its Definition of Done?
+   - If not: document the gap
+3. **Principles:** read `references/tech-planning/generation-principles.md`
+   and check if principles were followed in the generated code
+   - If violations were detected by parallel-review: were they fixed?
+4. **Verification result:** APPROVED | CAVEATS | REJECTED
 
 ### Step 8: Report results
 
@@ -304,27 +301,27 @@ This skill runs **after** the Plannotator gate approves the plan, replacing manu
 
 ## How to invoke
 
-### Com pi-supervisor (recomendado)
+### With pi-supervisor (recommended)
 
-O **pi-supervisor** é uma extensão que observa a conversa com um LLM separado
-(pode ser um modelo mais barato) e steering o agente de volta se ele desviar
-do objetivo. Use o slash command `/supervise` antes de começar:
+**pi-supervisor** is an extension that observes the conversation with a separate LLM
+(can be a cheaper model) and steers the agent back if it deviates
+from the objective. Use the supervision command before starting:
 
 ```bash
-/supervise Execute o plano aprovado em docs/{YYYY-MM-DD}/{slug}/plans/spec-tech_{v}.md
-roteando scopes corretamente. Salve relatório em execution-report.md.
+/supervise Execute the approved plan in docs/{YYYY-MM-DD}/{slug}/plans/spec-tech_{v}.md
+routing scopes correctly. Save report to execution-report.md.
 ```
 
-Depois que o supervisor confirmar (resposta "Supervision started"), prossiga:
+After the supervisor confirms (response "Supervision started"), proceed:
 
 ```bash
 /skill:cali-scope-executor
 ```
 
-O supervisor vai observar cada turno e, se o agente desviar do plano,
-injetar uma mensagem de steering para corrigir o curso.
+The supervisor watches each turn and, if the agent deviates from the plan,
+injects a steering message to correct course.
 
-### Sem supervisor
+### Without supervisor
 
 ```bash
 /skill:cali-scope-executor

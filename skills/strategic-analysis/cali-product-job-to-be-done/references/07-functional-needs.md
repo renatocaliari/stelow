@@ -37,7 +37,7 @@ Role: {Role provided by the user, otherwise consider the beneficiary of the Job}
 
     - Now, calculate the score based on the composite score, and order the success criteria by the highest to the lowest total score.  
     - Show the template output.  
-+   - Finally, after the entire detailed output, create a summary table with two columns: "Critério de Sucesso" and "Alternativa". List all the generated criteria and their respective alternatives in this table. 
++   - Finally, after the entire detailed output, create a summary table with two columns: "Success Criterion" and "Alternative". List all the generated criteria and their respective alternatives in this table. 
 
 
 

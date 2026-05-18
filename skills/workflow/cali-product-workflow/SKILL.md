@@ -79,25 +79,25 @@ In Phase 2 (Strategic Context), the user can choose strategic analyses **in para
 | **Short-Cycle Product** | `cali-product-short-cycle` | Experiment plan, metrics, pricing |
 
 All execute **concurrently** via `subagent({tasks: [...], concurrency: N})`.
-See `procedures/fase-2-context.md`.
+See `procedures/phase-2-context.md`.
 
 ---
 
 ## 📚 Complementary Domain Libraries (Phase 2b)
 
-Playbooks de domínio disponíveis para consulta tática durante planejamento/execução.
-A LLM os carrega automaticamente quando detecta relevância no pedido do usuário (Phase 2b).
+Domain playbooks available for tactical reference during planning/execution.
+The LLM loads them automatically when detecting relevance in the user's request (Phase 2b).
 
-| Library | Skill | Cobre |
+| Library | Skill | Covers |
 |---|---|---|
-| **Ads** | `cali-product-ads` | Transtheoretical Model, 5 estágios de awareness |
-| **Business Models** | `cali-product-business-models` | Redução de custo, geração de receita (Strategyn) |
-| **Health** | `cali-product-health` | Signals in tension, sucesso x contra-peso |
-| **Marketplace Playbook** | `cali-product-marketplace-playbook` | 19 táticas de estímulo a marketplaces |
-| **Open Source** | `cali-product-open-source` | Modelos de negócio OSS, fair code |
-| **Pricing** | `cali-product-pricing` | Exchange base, consumo, alinhamento, percepção |
-| **Promotions** | `cali-product-promotions` | MAGIC framework, 4 estratégias de lançamento |
-| **Trust Building** | `cali-product-trust-building` | 10 pilares, garantias, percepção |
+| **Ads** | `cali-product-ads` | Transtheoretical Model, 5 awareness stages |
+| **Business Models** | `cali-product-business-models` | Cost reduction, revenue generation (Strategyn) |
+| **Health** | `cali-product-health` | Signals in tension, success vs counterbalance |
+| **Marketplace Playbook** | `cali-product-marketplace-playbook` | 19 marketplace stimulation tactics |
+| **Open Source** | `cali-product-open-source` | OSS business models, fair code |
+| **Pricing** | `cali-product-pricing` | Exchange base, consumption, alignment, perception |
+| **Promotions** | `cali-product-promotions` | MAGIC framework, 4 launch strategies |
+| **Trust Building** | `cali-product-trust-building` | 10 pillars, guarantees, perception |
 
 When signaled, the LLM uses `ask_user_question({ multiSelect: true, options: [...] })` to offer these.
 If the user's request is purely domain-specific (e.g., "help me define pricing"), the flow may route directly to that skill instead of proceeding to Shape Up.
@@ -110,14 +110,14 @@ Follow the sequence below. For each phase, read the procedure in `procedures/` a
 
 | # | Phase | Procedure | Domain References |
 |---|-------|-----------|-------------------|
-| 1 | **Project Setup** | `procedures/fase-1-start.md` | — |
-| 2 | **Strategic Context** (optional) | `procedures/fase-2-context.md` | `references/strategic-exploration.md` |
-| 3 | **Shape Up Planning** | `procedures/fase-3-shape.md` | `references/shape-up/` |
-| 4 | **Interface Brainstorming** | `procedures/fase-4-interface.md` | `references/interface/` |
-| 5 | **Plan Critique** | `procedures/fase-5-critique.md` | `references/plan-critique/` |
-| 6 | **Review Gate** | `procedures/fase-6-gate.md` | — |
-| 7 | **Tech Planning** | `procedures/fase-7-tech-planning.md` | `references/tech-planning/` |
-| 8 | **Supervisor + Execution** | `procedures/fase-8-execution.md` | — |
+| 1 | **Project Setup** | `procedures/phase-1-setup.md` | — |
+| 2 | **Strategic Context** (optional) | `procedures/phase-2-context.md` | `references/strategic-exploration.md` |
+| 3 | **Shape Up Planning** | `procedures/phase-3-shape.md` | `references/shape-up/` |
+| 4 | **Interface Brainstorming** | `procedures/phase-4-interface.md` | `references/interface/` |
+| 5 | **Plan Critique** | `procedures/phase-5-critique.md` | `references/plan-critique/` |
+| 6 | **Review Gate** | `procedures/phase-6-gate.md` | — |
+| 7 | **Tech Planning** | `procedures/phase-7-tech-planning.md` | `references/tech-planning/` |
+| 8 | **Supervisor + Execution** | `procedures/phase-8-execution.md` | — |
 
 ### Auto-chaining rules
 

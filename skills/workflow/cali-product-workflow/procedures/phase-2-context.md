@@ -66,15 +66,15 @@ Save results to .cali-product-workflow/{YYYY-MM-DD}/{_dir}/strategic/${approach.
 
 **After Phase 2a**, the LLM analyzes the user's original request for **domain signals**:
 
-| Sinal no Input do Usuário | Domínio | Skill |
+| User Input Signal | Domain | Skill |
 |---|---|---|
-| "preço", "precificar", "quanto cobrar", "subscription", "assinatura" | Pricing | `cali-product-pricing` |
-| "lançar", "promoção", "black friday", "cupom", "desconto" | Promotions | `cali-product-promotions` |
-| "anúncio", "facebook ads", "google ads", "tráfego pago", "mídia paga" | Ads | `cali-product-ads` |
-| "confiança", "garantia", "prova social", "credibilidade" | Trust | `cali-product-trust-building` |
-| "modelo de negócio", "receita", "monetizar", "como ganhar dinheiro" | Business Models | `cali-product-business-models` |
-| "open source", "código aberto", "community edition" | Open Source | `cali-product-open-source` |
-| "saúde do produto", "métricas de produto", "vício", "bem-estar" | Health | `cali-product-health` |
+| "price", "pricing", "how much to charge", "subscription" | Pricing | `cali-product-pricing` |
+| "launch", "promotion", "black friday", "coupon", "discount" | Promotions | `cali-product-promotions` |
+| "ad", "ads", "facebook ads", "google ads", "paid traffic" | Ads | `cali-product-ads` |
+| "trust", "guarantee", "social proof", "credibility" | Trust | `cali-product-trust-building` |
+| "business model", "revenue", "monetize", "make money" | Business Models | `cali-product-business-models` |
+| "open source", "community edition" | Open Source | `cali-product-open-source` |
+| "product health", "product metrics", "addiction", "wellbeing" | Health | `cali-product-health` |
 | "marketplace", "marketplace supply", "marketplace demand" | Marketplace | `cali-product-marketplace-playbook` |
 
 **Two detection modes:**
@@ -91,8 +91,8 @@ The user wants full product planning but the input also contains domain signals.
 ```typescript
 ask_user_question({
   questions: [{
-    question: `Seu pedido menciona áreas específicas. Deseja carregar playbooks de referência para enriquecer o planejamento?
-Cada playbook fornece frameworks e referências sobre o domínio.`,
+    question: `Your request mentions specific areas. Would you like to load reference playbooks to enrich planning?
+Each playbook provides frameworks and references about the domain.`,
     header: "Domain Libraries",
     multiSelect: true,
     options: [

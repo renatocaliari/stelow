@@ -79,7 +79,7 @@ When `question` tool is not available, use enumerated text in chat (A/B/C/D or 1
 - **Ask which prompt the user wants to run** (unless already clear from context):
   - Use `question` tool with options 1-10 for the 10 JTBD prompts
   - Always include option: "I want you to recommend based on context" (in the user's language)
-  - Fallback: "Qual análise JTBD você quer realizar? (1-10, ou 'recomende com base no contexto')"
+  - Fallback: "Which JTBD analysis do you want to perform? (1-10, or 'recommend based on context')"
 - **Fill in the variables** indicated by `[brackets]` or `{{braces}}` with the information provided by the user before executing the prompt.
 - **Chain prompts sequentially** when the user wants a full analysis — the output of one prompt feeds into the next (e.g., Situational Variables → Functional Needs).
 - **Language of output**: The prompts are written in English (instructions to the LLM), but results should be delivered in the language used by the user.
@@ -111,7 +111,7 @@ This skill and all its prompts were developed by **Cali (Renato Caliari)** 🇧�
 
 These prompts are the result of years of experimentation and refinement, documented and shared through:
 
-- 📚 **E-book**: [Jobs To Be Done em Português](https://calirenato82.substack.com/p/e-book-jobs-to-be-done-em-portugues) — comprehensive guide to JTBD methodology
+- 📚 **E-book**: [Jobs To Be Done in Portuguese](https://calirenato82.substack.com/p/e-book-jobs-to-be-done-em-portugues) — comprehensive guide to JTBD methodology
 - 🔗 **Resources**: [Recursos Principais](https://calirenato82.substack.com/p/recursos-principais) — collection of prompts, frameworks, and tools
 - ✍️ **Substack**: Regular articles and experiments on JTBD, product strategy, and innovation
 

@@ -4,86 +4,86 @@ When generating code, plans, architecture, or any final product output, follow t
 
 ---
 
-## Princípios de Design de Código (aplicam-se a TODO código gerado)
+## Code Design Principles (apply to ALL generated code)
 
 ### 1. KISS — simplest solution that works correctly
-- Nenhuma função > 50 linhas (se precisar, extraia sub-funções)
-- Nenhum arquivo > 400 linhas (se precisar, divida em módulos)
-- Complexidade ciclomática por função < 10
-- Evite aninhamento profundo (max 3 níveis de indentação)
+- No function > 50 lines (if needed, extract sub-functions)
+- No file > 400 lines (if needed, split into modules)
+- Cyclomatic complexity per function < 10
+- Avoid deep nesting (max 3 indentation levels)
 
 ### 2. DRY — eliminate duplication
-- Duplicação de lógica = extrair função compartilhada
-- Duplicação de configuração = centralizar em constante/var
-- Duplicação de template = criar partial/componente
-- Duplicação > 5% do arquivo é sinal de alerta
+- Logic duplication = extract shared function
+- Configuration duplication = centralize in constant/var
+- Template duplication = create partial/component
+- Duplication > 5% of file is a warning sign
 
 ### 3. Convention over Configuration
-- Sensible defaults, nomes padronizados, estrutura de diretórios previsível
-- Configuração explícita apenas quando desviar da convenção
+- Sensible defaults, standardized names, predictable directory structure
+- Explicit configuration only when deviating from convention
 
 ### 4. Progressive Disclosure
-- Simples por padrão, complexidade atrás de toggles
-- Essencial primeiro, avançado depois
+- Simple by default, complexity behind toggles
+- Essentials first, advanced later
 
 ### 5. Polymorphism when useful
-- Interfaces para extensibilidade apenas quando agrega valor real
-- Prefira tipos concretos a abstrações prematuras
+- Interfaces for extensibility only when it adds real value
+- Prefer concrete types over premature abstractions
 
 ---
 
-## Princípios de Arquitetura Frontend
+## Frontend Architecture Principles
 
-### 6. Datastar: princípios do framework
+### 6. Datastar: framework principles
 
-Quando o projeto usa **Datastar** (detectado por import Datastar, uso de `data-*` attributes, ou Go + Templ + Datastar), siga os princípios do framework definidos pelo seu criador:
+When the project uses **Datastar** (detected by Datastar import, use of `data-*` attributes, or Go + Templ + Datastar), follow the framework principles defined by its creator:
 
-#### 6a. Backend é a fonte da verdade para estado
-- Estado de domínio vive no backend, nunca em signals ou stores no frontend
-- Signals no frontend são apenas para UI efêmera (toggle aberto/fechado, validação local, animação)
-- Toda decisão de negócio é validada no servidor — o frontend não confia em si mesmo
+#### 6a. Backend is the source of truth for state
+- Domain state lives in the backend, never in signals or stores on the frontend
+- Frontend signals are only for ephemeral UI (toggle open/close, local validation, animation)
+- Every business decision is validated on the server — the frontend does not trust itself
 
-#### 6b. SSE-first como mecanismo de comunicação
-- Use `datastar-patch-elements` via SSE para atualizações do backend
-- SSE é mais simples que WebSockets, tem reconexão automática do browser, e é mais eficiente que polling
-- WebSockets só quando houver necessidade real de comunicação bidirecional (chat, colaboração)
+#### 6b. SSE-first as communication mechanism
+- Use `datastar-patch-elements` via SSE for backend updates
+- SSE is simpler than WebSockets, has automatic browser reconnection, and is more efficient than polling
+- WebSockets only when there is real need for bidirectional communication (chat, collaboration)
 
-#### 6c. HATEOAS como princípio arquitetural
-- O backend determina quais ações o usuário pode tomar — links e formulários são descobertos via hipertexto
-- Ações disparam requests, backend responde com HTML, Datastar morpha no DOM
-- Frontend é um terminal burro e reativo — mínimo de lógica possível no cliente
+#### 6c. HATEOAS as architectural principle
+- The backend determines which actions the user can take — links and forms are discovered via hypertext
+- Actions trigger requests, backend responds with HTML, Datastar morphs into DOM
+- Frontend is a dumb reactive terminal — minimum possible logic on the client
 
-#### 6d. Locality of Behavior (LoB) para o frontend Datastar
-- Comportamento (atributos `data-*`) no MESMO componente HTML que o usa
-- Zero JavaScript customizado: use os atributos nativos do Datastar (`@get`, `@post`, `data-on`, `data-bind`, `data-signal`, etc.)
-- JS inline só quando Datastar não oferecer o comportamento nativo
+#### 6d. Locality of Behavior (LoB) for Datastar frontend
+- Behavior (`data-*` attributes) in the SAME HTML component that uses it
+- Zero custom JavaScript: use Datastar native attributes (`@get`, `@post`, `data-on`, `data-bind`, `data-signal`, etc.)
+- Inline JS only when Datastar does not offer native behavior
 
-Referência: [data-star.dev/guide](https://data-star.dev/guide) | [data-star.dev/essays/why_another_framework](https://data-star.dev/essays/why_another_framework)
+Reference: [data-star.dev/guide](https://data-star.dev/guide) | [data-star.dev/essays/why_another_framework](https://data-star.dev/essays/why_another_framework)
 
 ### 7. Separation of Concerns (SoC)
 
-Aplica-se a **TODO código que não é frontend Datastar**, incluindo:
-- **Backend do próprio projeto Datastar** (Go handlers, serviços, repositórios, banco)
-- **Projetos sem Datastar** (React, Vue, Svelte, Angular, HTML puro + JS)
-- **APIs, lógica de negócio, camada de dados** — independente do framework frontend
+Applies to **ALL code that is NOT Datastar frontend**, including:
+- **Backend of Datastar projects** (Go handlers, services, repositories, database)
+- **Non-Datastar projects** (React, Vue, Svelte, Angular, plain HTML + JS)
+- **APIs, business logic, data layer** — regardless of frontend framework
 
-- **Separe responsabilidades:** template, lógica, dados, e estilo em camadas distintas
-- **Componente/camada faz uma coisa só:** handler não deve chamar banco direto; serviço não deve renderizar HTML
-- **Lógica de negócio fora do template:** extraia para serviços, repositórios, helpers
-- **Nem toda função precisa estar no componente:** código reutilizável vive em módulos separados
+- **Separate responsibilities:** template, logic, data, and style in distinct layers
+- **Component/layer does one thing:** handler should not call database directly; service should not render HTML
+- **Business logic outside template:** extract to services, repositories, helpers
+- **Not every function needs to be in the component:** reusable code lives in separate modules
 
-### 8. Regra de desempate
+### 8. Tie-breaker rule
 
-| O quê | Princípio |
+| Context | Principle |
 |---|---|
-| Frontend **Datastar** (atributos `data-*`) | ✅ **LoB** — comportamento no HTML que o usa |
-| Backend de projeto Datastar (Go, handlers, serviços) | ✅ **SoC** — separação em camadas |
-| Projeto **sem Datastar** (React, Vue, etc.) | ✅ **SoC** — tudo em camadas separadas |
-| Mix Datastar + outro framework | ⚠️ LoB no frontend Datastar, SoC no resto |
-| Dúvida | **SoC** é o safe default |
+| **Datastar** frontend (`data-*` attributes) | ✅ **LoB** — behavior in the HTML that uses it |
+| Datastar project backend (Go, handlers, services) | ✅ **SoC** — separation into layers |
+| **Non-Datastar** project (React, Vue, etc.) | ✅ **SoC** — everything in separate layers |
+| Mix Datastar + other framework | ⚠️ LoB on Datastar frontend, SoC on rest |
+| Unsure | **SoC** is the safe default |
 
 ---
 
-## Quando em dúvida
+## When in doubt
 
-Simplest, most conventional path. Se LoB e SoC conflitarem, o contexto do framework decide.
+Simplest, most conventional path. If LoB and SoC conflict, the framework context decides.
