@@ -138,4 +138,4 @@ Tech plan is saved to:
 ## Environment Adaptation
 
 If a tool is unavailable, check:
-`../cali-product-workflow/references/environment-adaptation.md`
+`../../../cali-product-workflow/references/environment-adaptation.md`

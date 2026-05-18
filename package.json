@@ -28,11 +28,10 @@
       "./extensions/cali-product-workflow"
     ],
     "skills": [
-      "./skills/workflow/cali-product-workflow",
-      "./skills/workflow/cali-shape-up",
-      "./skills/workflow/cali-interface-brainstorm",
-      "./skills/workflow/cali-plan-critique",
-      "./skills/workflow/cali-tech-planning",
+      "./skills/cali-product-workflow/skills-workflow/cali-shape-up",
+      "./skills/cali-product-workflow/skills-workflow/cali-interface-brainstorm",
+      "./skills/cali-product-workflow/skills-workflow/cali-plan-critique",
+      "./skills/cali-product-workflow/skills-workflow/cali-tech-planning",
       "./skills/skills-strategic-analysis/cali-product-short-cycle",
       "./skills/skills-strategic-analysis/cali-product-opportunity-mapping",
       "./skills/skills-strategic-analysis/cali-product-job-to-be-done",
