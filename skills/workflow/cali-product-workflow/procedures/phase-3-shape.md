@@ -32,14 +32,16 @@ Read the outputs before proceeding.
 
 ### 1b. Shaping
 
-Read the shape-up section references to guide the process:
+Read the `references/shape-up/` files to guide the process:
 
-- **`references/shape-up/SHAPING-COMPLETE.md`** — context, clarification and responsibilities (consolidated from: context-reconstruction, clarification-rules, main-responsibilities)
-- **`references/shape-up/SHAPING-PRINCIPLES.md`** — core and shaping principles (consolidated from: core-principles, shaping-principles)
-- **`references/shape-up/RISK-ANALYSIS.md`** — risk analysis and strategic alternatives (consolidated from: risk-analysis-framework, strategic-alternatives)
-- **`references/shape-up/EXECUTION-GUIDE.md`** — sequencing, persistence and cross-domain (consolidated from: sequencing-and-persistence, cross-domain-adaptation, evolutionary-exploration)
-- **`references/shape-up/proposal-structure.md`** — shaping output structure
-- **`references/shape-up/output-expectations.md`** — strong vs weak output criteria
+| File | Covers |
+|---|---|
+| `references/shape-up/SHAPING-COMPLETE.md` | Context, clarification, responsibilities |
+| `references/shape-up/SHAPING-PRINCIPLES.md` | Core shaping principles |
+| `references/shape-up/RISK-ANALYSIS.md` | Risk analysis and strategic alternatives |
+| `references/shape-up/EXECUTION-GUIDE.md` | Sequencing, persistence, cross-domain adaptation |
+| `references/shape-up/proposal-structure.md` | Output structure for the shaped proposal |
+| `references/output-expectations.md` | Strong vs weak output criteria |
 
 Use `ask_user_question` for strategic questions when needed.
 

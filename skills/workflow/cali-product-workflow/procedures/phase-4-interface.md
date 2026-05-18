@@ -2,8 +2,17 @@
 
 > **Part of cali-product-workflow** — See [`SKILL.md`](../SKILL.md) for phase sequence, safety rules, and capability reference.
 
-Read \`references/interface/archetypes.md\` (5 archetypes), \`references/interface/output-format.md\`,
-and each individual archetype reference to guide the corresponding proposal.
+Read the `references/interface/` files to guide the process:
+
+| File | Covers | When to read |
+|---|---|---|
+| `references/interface/INTERFACE-CONTEXT.md` | Progressive Clarification, when to use, system equivalents | **Before starting** — sets behavioral rules |
+| `references/interface/INTERFACE-RECONSTRUCTION.md` | Context reconstruction, hidden job extraction | **Before generating** — prepare context |
+| `references/interface/INTERFACE-RULES.md` | Separation Rule, Forced Trade-Off Rule, output quality | **Before generating** — core generation rules |
+| `references/interface/archetypes.md` | 5 archetypes with descriptions | **During generation** — guide each proposal |
+| `references/interface/INTERFACE-EVALUATION.md` | Evaluation criteria, post-selection integration | **After generating** — evaluate proposals |
+| `references/interface/output-format.md` | Output format specification | **After generating** — format output |
+| `references/interface/hybrid-recommendation.md` | Hybrid recommendation strategy | **After evaluation** — create final recommendation |
 
 **Generate each proposal individually in parallel** (5 independent workers):
 
