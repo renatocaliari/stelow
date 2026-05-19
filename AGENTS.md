@@ -91,14 +91,23 @@ This package integrates with:
 ## Publishing
 
 ```bash
-# Version bump
-npm version patch  # or minor, major
+# Version bump (pre-release only - do NOT bump to 1.0.0)
+npm version 0.2.0-alpha  # or 0.2.0-beta
 
 # Publish
-npm publish --access public
+npm publish --access public --tag alpha
 
-# Or use release-please for automated releases
+# Create GitHub release with changelog
+gh release create v0.2.0-alpha \
+  --title "v0.2.0-alpha: New Features" \
+  --notes "## What's Changed\n\n- Feature A\n- Bug Fix B"
+
+# Push
+git push && git push origin v0.2.0-alpha
 ```
+
+**Important:** Keep version as `-alpha` or `-beta` until owner confirms 1.0.0.
+See [RELEASE_WORKFLOW.md](RELEASE_WORKFLOW.md) for full instructions.
 
 ## Architecture
 
