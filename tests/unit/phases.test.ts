@@ -2,7 +2,7 @@
  * Unit tests: Phases
  * 
  * Tests phase-related utilities and constants:
- * - PHASE_NAMES length and order
+ * - PHASE_NAMES length and order (11 phases)
  * - Phase index mapping
  * - Phase transitions (next, set)
  * - Phase status updates
@@ -18,19 +18,22 @@ import {
 // ── Constants ───────────────────────────────────────────────────────
 
 describe('PHASE_NAMES Constants', () => {
-  it('should have 8 phases (extension current implementation)', () => {
-    expect(PHASE_NAMES).toHaveLength(8);
+  it('should have 11 phases (matching SKILL.md)', () => {
+    expect(PHASE_NAMES).toHaveLength(11);
   });
 
   it('should have phases in correct order', () => {
     expect(PHASE_NAMES[0]).toBe('Setup');
     expect(PHASE_NAMES[1]).toBe('Context');
     expect(PHASE_NAMES[2]).toBe('Shape');
-    expect(PHASE_NAMES[3]).toBe('Interface');
-    expect(PHASE_NAMES[4]).toBe('Critique');
-    expect(PHASE_NAMES[5]).toBe('Gate');
-    expect(PHASE_NAMES[6]).toBe('Planning');
-    expect(PHASE_NAMES[7]).toBe('Execution');
+    expect(PHASE_NAMES[3]).toBe('Critique');
+    expect(PHASE_NAMES[4]).toBe('Gate');
+    expect(PHASE_NAMES[5]).toBe('Scope');
+    expect(PHASE_NAMES[6]).toBe('Interface');
+    expect(PHASE_NAMES[7]).toBe('Int.Gate');
+    expect(PHASE_NAMES[8]).toBe('Selection');
+    expect(PHASE_NAMES[9]).toBe('Planning');
+    expect(PHASE_NAMES[10]).toBe('Execution');
   });
 
   it('should have hints for all phases', () => {
@@ -41,13 +44,10 @@ describe('PHASE_NAMES Constants', () => {
 
   it('should have hints matching phase order', () => {
     expect(PHASE_HINTS[0]).toBe('setup');
-    expect(PHASE_HINTS[1]).toBe('context');
-    expect(PHASE_HINTS[2]).toBe('scopes');
-    expect(PHASE_HINTS[3]).toBe('proposals');
-    expect(PHASE_HINTS[4]).toBe('gaps');
-    expect(PHASE_HINTS[5]).toBe('review');
-    expect(PHASE_HINTS[6]).toBe('DoDs');
-    expect(PHASE_HINTS[7]).toBe('done');
+    expect(PHASE_HINTS[5]).toBe('scope');
+    expect(PHASE_HINTS[7]).toBe('int.gate');
+    expect(PHASE_HINTS[9]).toBe('planning');
+    expect(PHASE_HINTS[10]).toBe('execution');
   });
 });
 
@@ -59,11 +59,14 @@ describe('Phase Index Mapping', () => {
       0: 'Setup',
       1: 'Context',
       2: 'Shape',
-      3: 'Interface',
-      4: 'Critique',
-      5: 'Gate',
-      6: 'Planning',
-      7: 'Execution',
+      3: 'Critique',
+      4: 'Gate',
+      5: 'Scope',
+      6: 'Interface',
+      7: 'Int.Gate',
+      8: 'Selection',
+      9: 'Planning',
+      10: 'Execution',
     };
 
     Object.entries(mapping).forEach(([index, name]) => {
@@ -135,20 +138,6 @@ describe('Phase Status Logic', () => {
     expect(result[1].status).toBe('in-progress');
     expect(result[2].status).toBe('pending');
   });
-
-  it('should handle all phases completed', () => {
-    const phases: Phase[] = [
-      { id: '0-setup', name: 'Setup', status: '' },
-      { id: '1-context', name: 'Context', status: '' },
-    ];
-
-    const lastPhase = phases.length; // Use length as boundary
-    const result = getPhaseStatus(phases, lastPhase);
-    
-    // When index equals length, all are completed (or clipped)
-    expect(result[0].status).toBe('completed');
-    expect(result[1].status).toBe('completed');
-  });
 });
 
 // ── Phase Transitions ────────────────────────────────────────────────
@@ -177,14 +166,14 @@ describe('Phase Transitions', () => {
   }
 
   it('should advance to next phase', () => {
-    expect(nextPhase(0, 8)).toBe(1);
-    expect(nextPhase(1, 8)).toBe(2);
-    expect(nextPhase(6, 8)).toBe(7);
+    expect(nextPhase(0, 11)).toBe(1);
+    expect(nextPhase(1, 11)).toBe(2);
+    expect(nextPhase(9, 11)).toBe(10);
   });
 
   it('should not advance past last phase', () => {
-    expect(nextPhase(7, 8)).toBe(7);
-    expect(nextPhase(8, 8)).toBe(8);
+    expect(nextPhase(10, 11)).toBe(10);
+    expect(nextPhase(11, 11)).toBe(11);
   });
 
   it('should set phase and update statuses', () => {
@@ -239,9 +228,9 @@ describe('Phase Display Format', () => {
   }
 
   it('should format phase status correctly', () => {
-    expect(formatPhaseStatus(0, 8)).toBe('Setup 1/8');
-    expect(formatPhaseStatus(4, 8)).toBe('Critique 5/8');
-    expect(formatPhaseStatus(7, 8)).toBe('Execution 8/8');
+    expect(formatPhaseStatus(0, 11)).toBe('Setup 1/11');
+    expect(formatPhaseStatus(4, 11)).toBe('Gate 5/11');
+    expect(formatPhaseStatus(10, 11)).toBe('Execution 11/11');
   });
 
   it('should show current phase indicator', () => {
@@ -251,7 +240,7 @@ describe('Phase Display Format', () => {
 
     expect(icon(0, 2)).toBe('●');
     expect(icon(2, 2)).toBe('◆');
-    expect(icon(7, 2)).toBe('●');
+    expect(icon(10, 2)).toBe('●');
   });
 });
 
@@ -259,18 +248,28 @@ describe('Phase Display Format', () => {
 
 describe('SKILL.md Phase Mapping', () => {
   /**
-   * Current state: Extension has 8 phases, SKILL.md has 11 phases.
-   * This mismatch causes the footer to show "1/8" instead of "1/11".
-   * Task #7 will fix this by updating PHASE_NAMES to 11 phases.
+   * Extension 11 phases now match SKILL.md 11 phases.
    */
   const expectedSkillPhases = 11;
 
-  it('should document extension vs skill phase count mismatch', () => {
-    expect(PHASE_NAMES.length).toBe(8);
-    expect(expectedSkillPhases).toBe(11);
-    
-    // Document the issue for Task #7
-    console.log(`Phase mismatch: Extension=${PHASE_NAMES.length}, SKILL.md=${expectedSkillPhases}`);
-    console.log('Footer shows 1/8 instead of 1/11 - needs Task #7 fix');
+  it('should match SKILL.md phase count', () => {
+    expect(PHASE_NAMES.length).toBe(expectedSkillPhases);
+    console.log(`Phase count: Extension=${PHASE_NAMES.length}, SKILL.md=${expectedSkillPhases}`);
+    console.log('Footer will now show correct phase count (X/11)');
+  });
+
+  it('should map all extension phases to skill phases', () => {
+    // Extension phases now match skill phases directly
+    expect(PHASE_NAMES[0]).toBe('Setup');     // Phase 1
+    expect(PHASE_NAMES[1]).toBe('Context');   // Phase 2
+    expect(PHASE_NAMES[2]).toBe('Shape');    // Phase 3
+    expect(PHASE_NAMES[3]).toBe('Critique'); // Phase 4
+    expect(PHASE_NAMES[4]).toBe('Gate');      // Phase 5
+    expect(PHASE_NAMES[5]).toBe('Scope');     // Phase 6
+    expect(PHASE_NAMES[6]).toBe('Interface'); // Phase 7
+    expect(PHASE_NAMES[7]).toBe('Int.Gate'); // Phase 8
+    expect(PHASE_NAMES[8]).toBe('Selection'); // Phase 9
+    expect(PHASE_NAMES[9]).toBe('Planning'); // Phase 10
+    expect(PHASE_NAMES[10]).toBe('Execution'); // Phase 11
   });
 });

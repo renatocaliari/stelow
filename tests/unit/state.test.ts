@@ -188,9 +188,9 @@ describe('Phase Display Format', () => {
   }
 
   it('should format phase status correctly', () => {
-    expect(formatPhaseStatus(0, 8)).toBe('Setup 1/8');
-    expect(formatPhaseStatus(4, 8)).toBe('Critique 5/8');
-    expect(formatPhaseStatus(7, 8)).toBe('Execution 8/8');
+    expect(formatPhaseStatus(0, 11)).toBe('Setup 1/11');
+    expect(formatPhaseStatus(4, 11)).toBe('Gate 5/11');
+    expect(formatPhaseStatus(10, 11)).toBe('Execution 11/11');
   });
 
   it('should show current phase indicator', () => {
@@ -207,18 +207,11 @@ describe('Phase Display Format', () => {
 // ── SKILL.md Mapping ─────────────────────────────────────────────────
 
 describe('SKILL.md Phase Mapping', () => {
-  /**
-   * Current state: Extension has 8 phases, SKILL.md has 11 phases.
-   * This mismatch causes the footer to show "1/8" instead of "1/11".
-   * Task #7 will fix this by updating PHASE_NAMES to 11 phases.
-   */
+  // Extension now matches SKILL.md with 11 phases
   const expectedSkillPhases = 11;
 
-  it('should document extension vs skill phase count mismatch', () => {
-    expect(PHASE_NAMES.length).toBe(8);
-    expect(expectedSkillPhases).toBe(11);
-    
-    console.log(`Phase mismatch: Extension=${PHASE_NAMES.length}, SKILL.md=${expectedSkillPhases}`);
-    console.log('Footer shows 1/8 instead of 1/11 - needs Task #7 fix');
+  it('should match SKILL.md phase count', () => {
+    expect(PHASE_NAMES.length).toBe(expectedSkillPhases);
+    console.log('Footer now shows X/11 instead of X/8');
   });
 });

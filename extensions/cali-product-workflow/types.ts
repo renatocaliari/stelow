@@ -8,25 +8,31 @@ export const SCHEMA_URL =
 
 export const PHASE_NAMES = [
   "Setup",     // 0 — Phase 1: Project Setup
-  "Context",   // 1 — Phase 2: Strategic Context (optional)
+  "Context",   // 1 — Phase 2: Strategic Context
   "Shape",     // 2 — Phase 3: Shape Up Planning
-  "Interface", // 3 — Phase 4: Interface Brainstorming
-  "Critique",  // 4 — Phase 5: Plan Critique
-  "Gate",      // 5 — Phase 6: Review Gate
-  "Planning",  // 6 — Phase 7: Tech Planning
-  "Execution"  // 7 — Phase 8: Supervisor + Execution
+  "Critique",  // 3 — Phase 4: Plan Critique
+  "Gate",      // 4 — Phase 5: Review Gate
+  "Scope",     // 5 — Phase 6: Scope Adjustment
+  "Interface", // 6 — Phase 7: Interface Brainstorming
+  "Int.Gate", // 7 — Phase 8: Interface Gate
+  "Selection",// 8 — Phase 9: Interface Selection
+  "Planning",  // 9 — Phase 10: Tech Planning
+  "Execution"  // 10 — Phase 11: Execution
 ];
 
-/** Display hints shown in compact TUI per phase — placeholder until real artifact counts exist */
+/** Display hints shown in compact TUI per phase */
 export const PHASE_HINTS: Record<number, string> = {
   0: "setup",
   1: "context",
-  2: "scopes",
-  3: "proposals",
-  4: "gaps",
-  5: "review",
-  6: "DoDs",
-  7: "done"
+  2: "shape",
+  3: "critique",
+  4: "gate",
+  5: "scope",
+  6: "interface",
+  7: "int.gate",
+  8: "selection",
+  9: "planning",
+  10: "execution"
 };
 
 // ── Types ────────────────────────────────────────────────────────────
