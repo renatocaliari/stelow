@@ -44,6 +44,8 @@ Keep package names **exact** — pi may have multiple extensions with the same t
 | `/supervise` | **pi-supervisor** (tintinweb) | Execution steering | `single` |
 | `safe-change` | **pi-agent-codebase-workflows** (PriNova) | Regression check | `single` |
 
+**Before any `ask_user_question` call, read `phases/ask-patterns.md`** for standardized patterns (supports 2-6 options with preview).
+
 ---
 
 ## 📁 Directory Structure
@@ -101,51 +103,88 @@ Domain playbooks available for tactical reference during planning/execution:
 
 Follow the sequence below. For phases 3-5 and 7, delegate to subskills via `/skill:`. Each subskill has its own **Reference Index** — load the skill to see it.
 
-| # | Phase | Delegation |
-|---|-------|-----------|-------------------|
-| 1 | **Project Setup** | `phases/setup.md` |
-| 2 | **Strategic Context** (optional) | `phases/context.md` |
-| 3 | **Shape Up Planning** | `/skill:cali-shape-up` |
-| 4 | **Interface Brainstorming** | `/skill:cali-interface-brainstorm` |
-| 5 | **Plan Critique** | `/skill:cali-plan-critique` |
-| 6 | **Review Gate** | `phases/gate.md` |
-| 7 | **Tech Planning** | `/skill:cali-tech-planning` |
-| 8 | **Supervisor + Execution** | `phases/execution.md` |
+| # | Phase | Description |
+|---|-------|-------------|
+| 1 | **Project Setup** | Stages selection, safe-change |
+| 2 | **Strategic Context** (optional) | Strategic exploration + domain detection |
+| 3 | **Shape Up** | Create spec with problem/solution/scope |
+| 4 | **Plan Critique** | Pre-flight check (LLM automatic) |
+| 5 | **Review Gate (Plannotator)** | Visual approval — **never skip** |
+| 6 | **Scope Adjustment** | Add/remove from IN/OUT (ask) |
+| 7 | **Interface Brainstorming** | 5 proposals + hybrid (if selected) |
+| 8 | **Interface Gate (Plannotator)** | Visual review of all interfaces |
+| 9 | **Interface Selection** | User picks via ask with preview |
+| 10 | **Tech Planning** | Typed scopes + sequencing |
+| 11 | **Execution** | Goal/scope executor |
+
+### Flow Diagram
+
+```
+Phase 1: Setup
+    ↓
+Phase 2: Strategic Context (optional)
+    ↓
+Phase 3: Shape Up
+    ↓
+Phase 4: Plan Critique (pre-flight)
+    ↓
+Phase 5: Plannotator Gate ← visual pause
+    ↓
+Phase 6: Scope Adjustment (ask)
+    ↓
+Phase 7: Interface Brainstorming (if selected)
+    ↓
+Phase 8: Plannotator Gate (interfaces) ← visual pause
+    ↓
+Phase 9: Interface Selection (ask with preview)
+    ↓
+Phase 10: Tech Planning
+    ↓
+Phase 11: Execution
+```
 
 ### Auto-chaining rules
 
 | User selection | Phases that run automatically |
 |---|---|
-| Shape Up only | Shape Up → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
-| Interface only | Interface Brain. → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
-| Shape Up + Interface | Shape Up → Interface Brain. → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
-| Tech Planning only | Tech Planning (with its own **Review Gate**) → Execution |
-| Shape Up + Tech Planning | Shape Up → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
-| All | Shape Up → Interface Brain. → **Plan Critique** → **Review Gate** → Tech Planning (no gate) → Execution |
+| Shape Up only | Shape Up → Plan Critique → **Gate** → **Scope** → Tech Planning |
+| Shape Up + Interface | Shape Up → Plan Critique → **Gate** → **Scope** → Interface → **Interface Gate** → Selection → Tech Planning |
+| Tech Planning only | Tech Planning (with embedded Gate) → Execution |
 
-**Plan Critique** and **Review Gate** never appear as options — they are automatic.
-**Review Gate** never duplicates: comes from Plan Critique or embedded in Tech Planning (standalone).
+**Plan Critique** runs automatically before every Gate.
+**Gate** (Plannotator --gate) never skips — visual pause is mandatory.
+**Scope Adjustment** happens after Gate approval, via ask (no Plannotator re-run).
+**Interface Gate** shows all proposals visually before selection.
 
 ---
 
 ## ⚠️ Safety Rules
 
-### Review Gate (Phase 6)
+### Review Gate (Phase 5)
 1. **Verbal approval in chat does NOT replace the gate.** Even if the user says "approved", "go ahead" — run Plannotator with --gate.
 2. **Plannotator with --gate is MANDATORY.** Only proceed AFTER "approved".
 3. After approval: stamp the frontmatter (`approved: true`) + create receipt.
 4. Spec is frozen after approval. Future changes = `spec-product_{v+1}.md` + new gate.
 
-### Tech Planning (Phase 7)
+### Scope Adjustment (Phase 6)
+- No Plannotator re-run after scope changes — ask tool confirms selections
+- If adding items to IN, create new spec version (user is aware)
+- If removing items, update spec in-place
+
+### Interface Gate (Phase 8)
+- Visual review of all interface proposals before selection
+- Same rules as Phase 5 Gate — never skip
+
+### Tech Planning (Phase 10)
 - Before generating scopes: verify `approved: true` in spec-product.md
 - **Deterministic** — do not rely on memory, read the YAML frontmatter
 
-### Supervisor (Phase 8)
-- **Never activate during Phases 3-7.** The supervisor would re-submit Plannotator.
+### Supervisor (Phase 11)
+- **Never activate during Phases 3-10.** The supervisor would re-submit Plannotator.
 - Activate only during execution, WHEN STARTING each scope.
 
 ### Worktree
-- Optional in Phase 8. Ask the user.
+- Optional in Phase 11. Ask the user.
 - Workflows with 1 scope or no code changes can skip.
 
 ---

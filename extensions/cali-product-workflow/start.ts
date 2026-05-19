@@ -124,6 +124,7 @@ export default async function cmdStart(
     created: new Date().toISOString(),
     updated: new Date().toISOString(),
     cwd: wd,
+    dirHash,  // CRITICAL: needed for rename/archive operations
   };
 
   tracking.workflows.push(wf);

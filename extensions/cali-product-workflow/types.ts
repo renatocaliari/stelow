@@ -56,6 +56,7 @@ export interface Workflow {
   updated: string;
   cwd?: string;
   worktreePath?: string;  // Path to git worktree if created for execution
+  dirHash?: string;       // Stable directory name (e.g., pw-ollc-whkaxv) — REQUIRED for rename/archive operations
 }
 
 export interface TrackingData {

@@ -60,44 +60,9 @@ plannotator annotate .cali-product-workflow/{YYYY-MM-DD}/{_dir}/interfaces/inter
 
 ## User Selection
 
-After visual review, ask the user which proposal to follow:
+After visual review, ask the user which proposal to follow.
 
-```typescript
-ask_user_question({
-  questions: [{
-    question: `Which interface direction to follow?
-Recommendation: Hybrid (combination of each proposal's strengths).
-Justification: [1-2 sentences].`,
-    header: "Interface",
-    options: [
-      {
-        label: "H — Hybrid (Recommended)",
-        description: "Combination of the best elements from multiple proposals."
-      },
-      {
-        label: "A — Proposal A",
-        description: "Archetype A ({archetype name}) — {summary}"
-      },
-      {
-        label: "B — Proposal B",
-        description: "Archetype B ({archetype name}) — {summary}"
-      },
-      {
-        label: "C — Proposal C",
-        description: "Archetype C ({archetype name}) — {summary}"
-      },
-      {
-        label: "D — Proposal D",
-        description: "Archetype D ({archetype name}) — {summary}"
-      },
-      {
-        label: "E — Proposal E",
-        description: "Archetype E ({archetype name}) — {summary}"
-      }
-    ]
-  }]
-})
-```
+**Read** `../../phases/ask-patterns.md` for the standardized question pattern with previews.
 
 After selection, create `spec-product_{v+1}.md` incorporating the chosen interface (ASCII sketches).
 

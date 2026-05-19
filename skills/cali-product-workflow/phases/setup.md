@@ -91,17 +91,43 @@ ask_user_question({
 When the skill is invoked with `[RESUME: workflow X, phase Y]` context (from `/pw:resume`),
 follow this flow INSTEAD OF asking the user:
 
+**Step 1: Identify the correct workflow directory by name**
+
 ```bash
-WF_DIR=$(ls -d .cali-product-workflow/*/*/ 2>/dev/null | head -1)
-INDEX="$WF_DIR/index.json"
-if [ ! -f "$INDEX" ]; then
-  echo "RESUME_FAILED: index.json not found"
+# Find workflow by NAME (not _dir) matching the RESUME context
+RESUME_WF_NAME="$1"  # e.g., "wf-whkaxv" from [RESUME: workflow wf-whkaxv]
+
+# Scan all index.json files for matching name field
+MATCHED_DIR=""
+for f in .cali-product-workflow/*/*/index.json; do
+  if [ -f "$f" ]; then
+    WF_NAME=$(grep '"name"' "$f" | grep -oP '"[^"]+"' | head -1 | tr -d '"')
+    if [ "$WF_NAME" = "$RESUME_WF_NAME" ]; then
+      MATCHED_DIR=$(dirname "$f")
+      echo "MATCHED: name=$WF_NAME dir=$MATCHED_DIR"
+      break
+    fi
+  fi
+done
+
+if [ -z "$MATCHED_DIR" ]; then
+  echo "RESUME_FAILED: workflow '$RESUME_WF_NAME' not found in any index.json"
+  echo "Available workflows:"
+  for f in .cali-product-workflow/*/*/index.json; do
+    [ -f "$f" ] && echo "  - $(grep '"name"' "$f" | grep -oP '"[^"]+"' | head -1 | tr -d '"')"
+  done
   exit 1
 fi
-CURRENT_PHASE=$(grep '"current_phase_index"' "$INDEX" | grep -oP '\d+')
-_DIR=$(grep '"_dir"' "$INDEX" | grep -oP '"[^"]+"' | tail -1 | tr -d '"')
-echo "RESUMING: phase=$CURRENT_PHASE _dir=$_DIR"
+
+WF_DIR="$MATCHED_DIR"
+INDEX="$WF_DIR/index.json"
+_DIR=$(basename "$WF_DIR")  # _dir = directory name (e.g., pw-ollc-whkaxv)
+echo "RESUMING: name=$RESUME_WF_NAME _dir=$_DIR"
 ```
+
+> ⚠️ **CRITICAL**: The `{name}` field (display name, e.g., `wf-whkaxv`) is what the user sees.
+> The `{_dir}` field (directory name, e.g., `pw-ollc-whkaxv`) is the filesystem path.
+> **NEVER** confuse them — always match by `name`, not by `_dir`.
 
 After identifying the workflow:
 

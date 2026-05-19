@@ -9,39 +9,9 @@ The LLM checks if the user should be offered strategic analysis and/or domain li
 
 **ALWAYS ask** — read the Strategic Approaches section in the main SKILL.md for details.
 
-```typescript
-ask_user_question({
-  questions: [{
-    question: `Before planning, would you like to explore strategic directions?
-Each approach below generates inputs that feed into Shape Up.
-Recommendation: [justification based on project context].`,
-    header: "Strategy",
-    multiSelect: true,
-    options: [
-      {
-        label: "Jobs To Be Done (JTBD)",
-        description: "Map functional, emotional and social jobs the user hires for. Generates contextual segmentation and desired outcomes."
-      },
-      {
-        label: "Evolutionary Principles",
-        description: "Explore innovation via stepping-stones, novelty search and optionality. Useful when the path is not obvious."
-      },
-      {
-        label: "Opportunity Mapping",
-        description: "Map problem opportunities with ranked solutions. Generates a prioritized opportunity map."
-      },
-      {
-        label: "Market Analysis",
-        description: "PESTLE, Foresight, Wardley Maps. Useful for understanding competition, trends and positioning."
-      },
-      {
-        label: "Short-Cycle Product",
-        description: "Quick idea validation with short learning cycles. Ideal for unvalidated hypotheses."
-      },
-    ]
-  }]
-})
-```
+**Read** `ask-patterns.md` for the standardized question pattern (supports up to 6 options).
+
+> **⚠️ Multi-Select Rule:** When using `multiSelect: true`, DO NOT include "None", "Skip", or similar meta-options. User can select nothing to skip.
 
 **If user selects one or more approaches:**
 1. Read `references/strategic-exploration.md` for each approach's details
@@ -62,7 +32,7 @@ Save results to .cali-product-workflow/{YYYY-MM-DD}/{_dir}/strategic/${approach.
 3. Consolidate into `strategic-insights.md`
 4. Incorporate outputs as Shape Up input
 
-**If nothing selected:** proceed directly to Phase 2b.
+**If nothing selected (No strategic analysis):** proceed directly to Phase 2b.
 
 ### 2b. Domain Context Detection (conditional — LLM-driven)
 

@@ -231,9 +231,10 @@ export function renameWorkflow(
     writeGlobalTracking(globalTracking);
   }
 
-  // 3. index.json
+  // 3. index.json — use dirHash (NOT name) for filesystem path
   const ds = getDateStamp(new Date(wf.created));
-  const idxPath = join(cwd, WORKFLOW_DIR, ds, oldName, "index.json");
+  const dirToUse = wf.dirHash || oldName;  // dirHash is stable, name may change
+  const idxPath = join(cwd, WORKFLOW_DIR, ds, dirToUse, "index.json");
   if (existsSync(idxPath)) {
     try {
       const idx = JSON.parse(readFileSync(idxPath, "utf-8"));
@@ -332,6 +333,7 @@ export function reconcileTracking(cwd: string): Workflow[] {
         created: dw.created || new Date().toISOString(),
         updated: dw.updated || new Date().toISOString(),
         cwd,
+        dirHash: dw.dirHash,  // CRITICAL: needed for rename/archive operations
       };
       known.push(wf);
       changed = true;

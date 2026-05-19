@@ -61,16 +61,67 @@ Use `ask_user_question` for strategic questions when needed.
 After shaping:
 - Save to `.cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spec-product_{v}.md`
 - Do not ask about Interface Brainstorming — already decided in Phase 1 (Setup)
+- **Do NOT ask scope adjustment yet** — this happens after Plan Critique and Gate approval (see workflow sequence below)
 
-## 1c. Scope Adjustment (after Shape Up)
+## Workflow Sequence
+
+After Shape Up, the workflow proceeds:
+
+```
+Shape Up
+    ↓
+Plan Critique (pre-flight check)
+    ↓
+Plannotator (Gate — visual approval)
+    ↓
+Scope Adjustment (ask) ← HERE scope happens
+    ↓
+Interface Brainstorming (if selected)
+```
+
+**Note:** Scope Adjustment comes AFTER Gate approval, not before.
+
+## Scope Adjustment (after Gate approval)
+
+**This section executes after Plannotator Gate approval** (not immediately after shaping).
+
+When triggered by the orchestrator:
 
 Show the IN/OUT scope table. Ask:
 
-1. **Remove IN scopes?** — `ask_user_question` multiSelect with current scopes
-2. **Include OUT scopes?** — `ask_user_question` multiSelect with out-of-scope items
+1. **Remove from IN?** — `ask_user_question` multiSelect with current IN scopes
+2. **Add to IN?** — `ask_user_question` multiSelect with OUT scope items
 
-If user selects nothing → proceed with original Shape Up.
-If there are removals/inclusions → create `spec-product_{v+1}.md` with adjusted scopes and document what changed.
+```typescript
+ask_user_question({
+  questions: [
+    {
+      question: "What should be REMOVED from IN scope? (select none to keep current)",
+      header: "Remove IN",
+      multiSelect: true,
+      options: [
+        { label: "{IN scope item 1}", description: "{description}" },
+        { label: "{IN scope item 2}", description: "{description}" }
+      ]
+    },
+    {
+      question: "What should be ADDED to IN scope? (select none to keep current)",
+      header: "Add to IN",
+      multiSelect: true,
+      options: [
+        { label: "{OUT scope item 1}", description: "{description}" },
+        { label: "{OUT scope item 2}", description: "{description}" }
+      ]
+    }
+  ]
+})
+```
+
+**If user removes items:** update spec
+**If user adds items:** create `spec-product_{v+1}.md` (user is aware)
+**If user selects nothing:** proceed without changes
+
+**Note:** No Plannotator re-run — ask tool already confirms selections.
 
 ## Output
 
