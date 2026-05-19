@@ -89,16 +89,25 @@ From research: coverage alone is insufficient. A test suite with 100% coverage b
 
 ### Step 4: Define Test Scope Types
 
-For each IN scope in spec-product.md, add corresponding test scopes:
+For each IN scope in spec-product.md, add corresponding test scopes.
 
-| Code Type | Test Type | When to Use | TDD? |
-|----------|-----------|-------------|------|
-| Business logic | `test-unit` | Core functionality | **Yes — critical paths** |
-| External APIs | `test-integration` | DB, APIs, queues | No — test-after |
-| Security-sensitive | `test-security` | Auth, payment, data | No — automated |
-| Agent workflows | `test-behavior` | Multi-step agents | No — multi-run |
+**Greenfield (new code):**
 
-### Step 5: Generate Anti-Patterns Checklist
+| Code Type | Test Type | When to Use | TDD? | Section |
+|----------|-----------|-------------|------|---------|
+| Business logic | `test-unit` | Core functionality | **Yes — critical paths** | [test-unit](#test-unit-core-functionality-greenfield) |
+| External APIs | `test-integration` | DB, APIs, queues | No — test-after | [test-integration](#test-integration-external-apis-greenfield) |
+| Security-sensitive | `test-security` | Auth, payment, data | No — automated | [test-security](#test-security-security-sensitive-code-greenfield) |
+| Agent workflows | `test-behavior` | Multi-step agents | No — multi-run | [test-behavior](#test-behavior-agent-workflows-greenfield) |
+
+**Brownfield/Hybrid (existing code):**
+
+| Code Type | Test Type | When to Use | Context |
+|----------|-----------|-------------|---------|
+| Protect existing | `test-regression` | Detect regressions | Brownfield/Hybrid |
+| Document behavior | `test-characterization` | Golden tests | Brownfield |
+| Replay past tasks | `test-simulation` | Verify consistency | Brownfield |
+| Impact analysis | `test-impact` | TDAD-style | Brownfield |
 
 Based on MSR 2026 research (agents use mocks 36% vs 26% humans):
 
