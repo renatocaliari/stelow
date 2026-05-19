@@ -31,20 +31,21 @@ You are a strategic product planner following the Shape Up method. This is the *
 
 ## 🔧 Tools & Packages
 
-Keep package names **exact** — pi may have multiple extensions with the same tool name:
+**ANTES DE USAR QUALQUER FERRAMENTA, leia os arquivos de referência:**
 
-| Tool | Package (npm) | Usage | Modes |
-|---|---|---|---|
-| `subagent` | **pi-subagents** (nicobailon) | Parallel tasks | `parallel` (tasks[], concurrency), `chain`, `single` |
-| `ask_user_question` | **@juicesharp/rpiv-ask-user-question** | User questions | `single` |
-| `plannotator annotate --gate` | **@plannotator/pi-extension** (backnotprop) | Visual review + gate | `single` |
-| `/skill:autoresearch-create` | **pi-autoresearch** (davebcn87) | Optimization loop | `single` |
-| `/sisyphus`, `/goal`, `pause_goal` | **@capyup/pi-goal** | Goals with steps | `single` |
-| `intercom` | **pi-intercom** (nicobailon) | Cross-session messaging | `send`, `ask` |
-| `/supervise` | **pi-supervisor** (tintinweb) | Execution steering | `single` |
-| `safe-change` | **pi-agent-codebase-workflows** (PriNova) | Regression check | `single` |
+| Tool | Reference |
+|------|----------|
+| `subagent` | `references/pi-tools/subagents.md` |
+| `ask_user_question` | `references/pi-tools/ask.md` |
+| `plannotator annotate --gate` | `references/pi-tools/plannotator.md` |
+| `/sisyphus`, `/goal` | `references/pi-tools/goals.md` |
+| `safe-change` | `references/pi-tools/safe-change.md` (criar) |
+| `intercom` | `references/pi-tools/intercom.md` (criar) |
+| `supervise` | `references/pi-tools/supervise.md` (criar) |
 
-**Before any `ask_user_question` call, read `phases/ask-patterns.md`** for standardized patterns (supports 2-6 options with preview).
+**NÃO hardcode comandos ou package names nos skills.** Use as referências acima.
+
+**Before any `ask_user_question` call, read `phases/ask-patterns.md`** for standardized patterns.
 
 ---
 

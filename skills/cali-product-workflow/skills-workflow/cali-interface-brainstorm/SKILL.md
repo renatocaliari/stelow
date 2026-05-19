@@ -8,6 +8,8 @@ description: >
 
 # Interface Brainstorming
 
+> **Tools:** See `references/pi-tools/subagents.md` for subagent patterns.
+
 ## Overview
 
 This skill executes the Interface Brainstorming phase. It can be run:

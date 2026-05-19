@@ -8,7 +8,7 @@ description: >
 
 # Tech Planning Sequencing
 
-## Overview
+> **Tools:** See `references/pi-tools/subagents.md` for subagent patterns, `references/pi-tools/goals.md` for goal commands.
 
 This skill executes the Tech Planning phase. It can be run:
 1. **Standalone:** `/skill:cali-tech-planning` — after Shape Up and Critique
