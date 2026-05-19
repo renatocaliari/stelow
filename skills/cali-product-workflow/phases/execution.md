@@ -74,6 +74,10 @@ Proceed directly to scope execution in the current directory.
 | Refactoring without metric | No | `/sisyphus` | `/supervise` with outcome = DoD |
 | Investigative spike | No | `/sisyphus` | `/supervise` with outcome = DoD |
 | Interface brainstorming | No | `/sisyphus` (5 proposals) | `/supervise` with outcome = DoD |
+| `test-unit` | No | `/sisyphus` | Testing gates (see below) |
+| `test-integration` | No | `/sisyphus` | Testing gates (see below) |
+| `test-security` | No | `/sisyphus` | Testing gates (see below) |
+| `test-behavior` | No | `/sisyphus` | Testing gates (see below) |
 
 ### When starting execution of each scope:
 
@@ -96,6 +100,36 @@ Proceed directly to scope execution in the current directory.
 > **Tip:** `/supervise` is especially useful for long scopes where the LLM
 > may forget the original objective. Activate WHEN STARTING the scope, not before.
 
+### 6c. Testing Gates (AI-Aware Testing for Software Products)
+
+**For test-* scopes, hard blocks are enforced:**
+
+| Gate | Condition | Action | Rationale |
+|------|-----------|--------|----------|
+| **Mutation Score** | mutation_score < target | 🔴 BLOCK | AI code has 1.7x more bugs; mutation testing validates test quality |
+| **Security Findings** | security_findings > 0 on critical paths | 🔴 BLOCK | 45% of AI code contains vulnerabilities (Veracode 2025) |
+| **Flaky Tests** | flaky_rate > 5% | 🟡 WARN | Agents generate non-deterministic tests |
+| **Test Execution** | duration > 10min | 🟡 WARN | CI/CD pipeline impact |
+
+**Mutation testing loop:**
+1. Generate tests (AI)
+2. Run mutation testing (Stryker/PIT/mutmut)
+3. If mutation_score < target → feed surviving mutants back to AI
+4. Repeat until target reached
+
+**Security scanning:**
+- Run SAST on every commit for critical paths
+- Block if CVSS >= 7.0 vulnerabilities found
+- 2.5x more critical vulnerabilities in AI code (ACM TOSEM)
+
+**Anti-patterns to detect:**
+- ❌ Over-mocking (>3 mocks per test) — agents use mocks 36% vs 26% for humans
+- ❌ 100% coverage target — coverage ≠ test quality
+- ❌ Single-run validation — agents are non-deterministic
+- ❌ Snapshot tests for non-UI components
+
+See `skills-execution/cali-testing-ai-code/SKILL.md`
+
 ## Phase 11: Execution — AUTOMATIC
 
 > **CRITICAL: After Tech Planning approval, execution is MANDATORY.**
@@ -113,6 +147,7 @@ After Plannotator approval on spec-tech_v{N}.md:
 | `feature` | `/sisyphus` + `/supervise` | `/skill:cali-product-scope-executor` |
 | `optimization` | `/skill:autoresearch-create` | `/skill:autoresearch-create` |
 | `spike` | `/sisyphus` + `/supervise` | `/skill:cali-product-scope-executor` |
+| `test-*` | `/sisyphus` + testing gates | `/skill:cali-product-scope-executor` |
 
 ### Executing Scopes
 

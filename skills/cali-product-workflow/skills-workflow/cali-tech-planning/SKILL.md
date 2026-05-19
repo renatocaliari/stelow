@@ -2,7 +2,8 @@
 name: cali-tech-planning
 description: >
   [Cali] Technical planning and scope sequencing skill. Generates typed scopes
-  (feature/optimization/spike), sequences them, and creates /sisyphus goals.
+  (feature/optimization/spike + test-*), sequences them, and creates /sisyphus goals.
+  For software products, also generates testing-strategy.md via cali-testing-ai-code.
   Part of cali-product-workflow but can be used standalone.
 ---
 
@@ -25,6 +26,15 @@ head -10 spec-product_{v}.md | grep "approved:"
 
 This check is **deterministic** — does not depend on memory.
 
+### AI-Aware Testing Check
+
+**For software products**, also check `product_type`:
+```bash
+head -10 spec-product_{v}.md | grep "product_type:"
+```
+- ✅ `product_type: software` or `product_type: hybrid` → activate cali-testing-ai-code
+- ❌ `product_type: service` → skip testing strategy
+
 ## References Index
 
 Read the `references/` files to guide the process:
@@ -32,7 +42,7 @@ Read the `references/` files to guide the process:
 | File | Covers | When to read |
 |---|---|---|
 | `references/TECH-CONTEXT.md` | Tech planning context, prerequisites, workflow position | **Before starting** — sets planning context |
-| `references/SCOPES-AND-SEQUENCING.md` | Scope types (feature/optimization/spike), executor routing, sequencing principles | **During generation** — defines scope structure |
+| `references/SCOPES-AND-SEQUENCING.md` | Scope types (feature/optimization/spike + test-*), executor routing, sequencing principles | **During generation** — defines scope structure |
 | `references/TECH-OUTPUT.md` | Tech plan output format, frontmatter, receipts | **After generation** — formats output |
 | `references/generation-principles.md` | Generation principles, constraints, quality standards | **During generation** — guides implementation |
 
@@ -64,6 +74,40 @@ Input: .cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spec-product_{v}.md`,
 
 Output: `.cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spec-tech_{v}.md`
 Input: `.cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spec-product_{v}.md`
+
+### 7b. AI-Aware Testing Strategy (Software Products Only)
+
+**If `product_type: software` or `product_type: hybrid`**:
+
+1. **Generate testing-strategy.md:**
+```typescript
+subagent({
+  agent: "cali-testing-ai-code",
+  task: `Generate testing strategy for software product.
+Input: spec-product.md (frontmatter with product_type: software)
+Output: .cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/testing-strategy.md
+
+Include:
+- Mutation score targets (70/50/30%)
+- Tech stack detection
+- CI/CD gates (hard blocks)
+- Anti-patterns (over-mocking, 100% coverage)`,
+  output: ".cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/testing-strategy.md"
+})
+```
+
+2. **Add test-* scopes to spec-tech.md:**
+
+Based on testing-strategy.md, add scopes for:
+- `test-unit`: Unit tests for critical business logic (TDD recommended)
+- `test-integration`: Integration tests for DB, APIs, external services
+- `test-security`: Security scanning gates
+- `test-mutation`: Mutation testing validation
+
+**Note on TDD:** Research shows TDD alone is insufficient for AI-generated code.
+- Use TDD for critical business logic (isolated, deterministic)
+- Use Test-After + Mutation for standard paths
+- Never use same AI for both code AND test generation
 
 ### 5b. Tech Planning Review Gate
 
@@ -138,8 +182,18 @@ After Plannotator approval on spec-tech_v{N}.md:
 2. Execute scopes based on type:
    - `feature` → `/sisyphus` + `/supervise`
    - `optimization` → `/skill:autoresearch-create`
+   - `test-unit`, `test-integration`, `test-security`, `test-behavior` → `/sisyphus` (with testing gates)
 
 See `phases/execution.md` for full execution flow.
+
+### Testing Gates (test-* scopes)
+
+For test-* scopes, the execution includes hard blocks:
+- **test-mutation**: mutation_score >= target → BLOCK if below
+- **test-security**: security_findings == 0 on critical paths → BLOCK if found
+- **test-integration**: flaky_rate < 5% → WARN if above
+
+See `skills-execution/cali-testing-ai-code/SKILL.md`
 
 ## Related Skills
 

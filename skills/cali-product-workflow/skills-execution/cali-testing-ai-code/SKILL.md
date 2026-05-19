@@ -1,0 +1,236 @@
+---
+name: cali-testing-ai-code
+description: >
+  [Cali] AI-aware testing strategy skill for software products.
+  Generates mutation-based testing plans, security gates, and coverage targets.
+  Activated automatically when product_type is "software" or "hybrid".
+  Based on empirical research: AgentAssay (2026), MSR 2026, Veracode 2025, CodeRabbit 2025.
+---
+
+# AI-Aware Testing Strategy
+
+> **Based on empirical research:**
+> - AgentAssay (2026): Non-deterministic agent testing framework
+> - MSR 2026: Over-mocking anti-patterns in AI-generated tests
+> - Veracode 2025: 45% of AI code contains vulnerabilities
+> - CodeRabbit 2025: AI code has 1.7x more bugs than human code
+> - CoderEval (2023): 43.1% of AI code is less robust
+
+## Activation
+
+- **Trigger:** `product_type: software` or `product_type: hybrid` in spec-product.md frontmatter
+- **Phase:** Phase 10 (Tech Planning)
+- **Prerequisite:** approved spec-product.md with scope defined
+
+## Input
+
+From Tech Planning context:
+- `spec-product.md` (frontmatter with product_type)
+- `spec-tech.md` (scopes to add test-* types)
+- Tech stack detection
+
+## Output
+
+| Artifact | Path |
+|----------|------|
+| `testing-strategy.md` | `.cali-product-workflow/{date}/{_dir}/plans/` |
+
+---
+
+## Process
+
+### Step 1: Detect Tech Stack
+
+Auto-detect testing frameworks from project files:
+
+| Language | Detection File | Unit Framework | Mutation Tool | Security Tool |
+|----------|--------------|---------------|--------------|---------------|
+| Python | `requirements.txt`, `pyproject.toml` | pytest | mutmut | Bandit |
+| JavaScript/TypeScript | `package.json` | Vitest, Jest | Stryker | ESLint + SAST |
+| Go | `go.mod` | testing | go-mutate | Gosec |
+| Rust | `Cargo.toml` | cargo test | muter | cargo-audit |
+| Java | `pom.xml`, `build.gradle` | JUnit | PIT | SpotBugs |
+
+### Step 2: Classify Scope Risk
+
+Based on spec-tech.md scopes:
+
+| Risk Level | Examples | Mutation Target |
+|------------|----------|----------------|
+| **Critical** | Payment, auth, data persistence, security | 70% min |
+| **Standard** | CRUD, UI, API endpoints | 50% min |
+| **Experimental** | Prototypes, new features | 30% min |
+
+### Step 3: Generate Mutation Targets
+
+From research: coverage alone is insufficient. A test suite with 100% coverage but 4% mutation score executes every line but misses 96% of potential bugs.
+
+| Path Type | Mutation Score Target | Minimum |
+|-----------|---------------------|---------|
+| Critical paths | 70% | 60% |
+| Standard features | 50% | 40% |
+| Experimental | 30% | 20% |
+
+### Step 4: Define Test Scope Types
+
+For each IN scope in spec-product.md, add corresponding test scopes:
+
+| Code Type | Test Type | When to Use | TDD? |
+|----------|-----------|-------------|------|
+| Business logic | `test-unit` | Core functionality | **Yes — critical paths** |
+| External APIs | `test-integration` | DB, APIs, queues | No — test-after |
+| Security-sensitive | `test-security` | Auth, payment, data | No — automated |
+| Agent workflows | `test-behavior` | Multi-step agents | No — multi-run |
+
+### Step 5: Generate Anti-Patterns Checklist
+
+Based on MSR 2026 research (agents use mocks 36% vs 26% humans):
+
+**Anti-patterns to flag:**
+- ❌ Mock count > 3 per test
+- ❌ Mocks for simple objects (use real objects instead)
+- ❌ 100% coverage target (coverage ≠ test quality)
+- ❌ Snapshot tests for non-UI components
+- ❌ Single-run validation (agents are non-deterministic)
+- ❌ Same AI for both code AND test generation (circular validation)
+
+### Step 6: Create CI/CD Gates
+
+```yaml
+GATES:
+  mutation_score:
+    condition: "< target"
+    action: BLOCK
+    rationale: "AI code has 1.7x more bugs"
+  
+  security_findings:
+    condition: "> 0 on critical paths"
+    action: BLOCK
+    rationale: "45% of AI code contains vulnerabilities (Veracode 2025)"
+  
+  flaky_rate:
+    condition: "> 5%"
+    action: WARN
+    rationale: "Agents generate non-deterministic tests"
+```
+
+---
+
+## TDD Guidance (Research-Based)
+
+**Key finding from empirical research:** TDD alone is **insufficient** for AI-generated code.
+
+| Code Type | TDD Recommended? | Rationale |
+|-----------|-----------------|-----------|
+| Critical business logic | ✅ **Yes** | Isolated, deterministic — TDD provides design feedback + validates understanding |
+| External APIs | ❌ No — test-after | Over-mocking is anti-pattern; use real dependencies |
+| Security-sensitive | ❌ No — automated gates | 45% vulnerability rate requires continuous scanning |
+| Agent workflows | ❌ No — behavioral | Non-deterministic — needs multiple runs, mutation testing |
+| Standard features | ⚠️ **Optional** | Use test-after + mutation validation |
+
+**Why TDD is insufficient alone:**
+1. AI generates code with 1.7x more bugs than humans
+2. AI misses corner cases (75% more logic/correctness errors)
+3. Same AI that generates code shouldn't also generate tests (circular validation)
+4. Tests generated by same AI may pass but miss edge cases
+
+**Best practice:** 
+- TDD for **critical paths** (isolated, deterministic) + 
+- Mutation testing for **everything else** (validates test quality)
+
+---
+
+## Mutation Testing Loop
+
+Based on research feedback loop from CMU + mutating.tech:
+
+```
+1. Generate tests (AI)
+2. Run mutation testing (Stryker/PIT/mutmut)
+3. If mutation_score < target:
+   - Identify surviving mutants
+   - Feed surviving mutants back to AI
+   - Generate tests to kill the mutants
+4. Repeat until mutation_score >= target
+```
+
+**Mutation operators for AI code:**
+- Control-flow: `>` → `>=`, `+` → `-`, boolean flip
+- Context: prompt changes, tool variations
+- Security: injection patterns
+
+---
+
+## Output Format
+
+### testing-strategy.md
+
+```markdown
+---
+version: 1
+product_type: software
+generated_by: cali-testing-ai-code
+generated_at: {YYYY-MM-DD}
+---
+
+# Testing Strategy for {product_name}
+
+## Tech Stack
+- Language: {language}
+- Unit: {framework}
+- Mutation: {tool}
+- Security: {tool}
+
+## Mutation Score Targets
+| Path Type | Target | Minimum |
+|-----------|--------|---------|
+| Critical | 70% | 60% |
+| Standard | 50% | 40% |
+| Experimental | 30% | 20% |
+
+## Test Scopes
+| Scope | Type | Mutation Target |
+|-------|------|----------------|
+| {feature-name} | test-unit | 70% |
+| {feature-name} | test-integration | 50% |
+| {feature-name} | test-security | 70% |
+
+## CI/CD Gates
+- BLOCK: mutation_score < target
+- BLOCK: security_findings > 0 on critical paths
+- WARN: flaky_rate > 5%
+
+## Anti-Patterns
+- ❌ > 3 mocks per test
+- ❌ Mocks for simple objects
+- ❌ 100% coverage target
+- ❌ Same AI for code AND tests
+```
+
+---
+
+## Success Criteria
+
+- [ ] testing-strategy.md generated
+- [ ] test-* scopes added to spec-tech.md
+- [ ] Mutation targets calibrated per risk level
+- [ ] CI/CD gates documented
+- [ ] Anti-patterns checklist included
+
+---
+
+## Fallback
+
+If tech stack detection fails:
+- Python → pytest + mutmut + Bandit
+- JavaScript/TypeScript → Vitest + Stryker + ESLint
+- Go → testing + go-mutate + Gosec
+- Rust → cargo test + muter + cargo-audit
+
+---
+
+## Related Skills
+
+- **cali-tech-planning**: Produces scopes to test
+- **cali-product-scope-executor**: Executes test scopes
+- **cali-plan-critique**: Can review testing strategy

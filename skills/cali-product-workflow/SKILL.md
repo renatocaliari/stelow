@@ -10,6 +10,7 @@ description: >
   - /skill:cali-interface-brainstorm — Interface brainstorming
   - /skill:cali-plan-critique — Plan critique
   - /skill:cali-tech-planning — Tech planning
+  - /skill:cali-testing-ai-code — AI-aware testing strategy (software products only)
   
   Standalone loading: skills-workflow/cali-{name}/SKILL.md
   
@@ -107,19 +108,35 @@ Domain playbooks available for tactical reference during planning/execution:
 
 Follow the sequence below. For phases 3-5 and 7, delegate to subskills via `/skill:`. Each subskill has its own **Reference Index** — load the skill to see it.
 
-| # | Phase | Description |
-|---|-------|-------------|
-| 1 | **Project Setup** | Stages selection, safe-change |
-| 2 | **Strategic Context** (optional) | Strategic exploration + domain detection |
-| 3 | **Shape Up** | Create spec with problem/solution/scope |
-| 4 | **Plan Critique** | Pre-flight check (LLM automatic) |
-| 5 | **Review Gate (Plannotator)** | Visual approval — **never skip** |
-| 6 | **Scope Adjustment** | Add/remove from IN/OUT (ask) |
-| 7 | **Interface Brainstorming** | 5 proposals + hybrid (if selected) |
-| 8 | **Interface Gate (Plannotator)** | Visual review of all interfaces |
-| 9 | **Interface Selection** | User picks via ask with preview |
-| 10 | **Tech Planning** | Typed scopes + sequencing |
-| 11 | **Execution** | Goal/scope executor |
+| # | Phase | Description | Trigger |
+|---|-------|-------------|---------|
+| 1 | **Project Setup** | Stages selection, safe-change | — |
+| 2 | **Strategic Context** (optional) | Strategic exploration + domain detection | — |
+| 3 | **Shape Up** | Create spec with problem/solution/scope | — |
+| 4 | **Plan Critique** | Pre-flight check (LLM automatic) | — |
+| 5 | **Review Gate (Plannotator)** | Visual approval — **never skip** | — |
+| 6 | **Scope Adjustment** | Add/remove from IN/OUT (ask) | — |
+| 7 | **Interface Brainstorming** | 5 proposals + hybrid (if selected) | — |
+| 8 | **Interface Gate (Plannotator)** | Visual review of all interfaces | — |
+| 9 | **Interface Selection** | User picks via ask with preview | — |
+| 10 | **Tech Planning** | Typed scopes + sequencing | — |
+| 11 | **Execution** | Goal/scope executor | — |
+
+### AI-Aware Testing (Conditional)
+
+**Phase 10 triggered:** When `product_type: software` or `product_type: hybrid`:
+
+```
+Tech Planning
+    ↓
+[product_type check]
+    ↓ software/hybrid
+cali-testing-ai-code → testing-strategy.md + test-* scopes
+    ↓
+Execution
+```
+
+See `skills-execution/cali-testing-ai-code/SKILL.md`
 
 ### Flow Diagram
 
@@ -183,6 +200,10 @@ Use `references/pi-tools/plannotator.md` for Plannotator command.
 ### Tech Planning (Phase 10)
 - Before generating scopes: verify `approved: true` in spec-product.md
 - **Deterministic** — do not rely on memory, read the YAML frontmatter
+- **AI-Aware Testing**: If `product_type: software` or `product_type: hybrid` in frontmatter:
+  - Activate `/skill:cali-testing-ai-code` to generate testing-strategy.md
+  - Add `test-*` scope types to spec-tech.md
+  - See `skills-execution/cali-testing-ai-code/SKILL.md`
 
 ### Supervisor (Phase 11)
 - **Never activate during Phases 3-10.** The supervisor would re-submit Plannotator.

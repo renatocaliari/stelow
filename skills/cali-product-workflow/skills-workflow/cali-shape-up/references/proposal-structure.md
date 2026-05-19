@@ -95,3 +95,46 @@ Explicitly define:
 - avoided complexity
 
 Out-of-scope protects focus.
+
+---
+
+## 4. Output Frontmatter Template
+
+The proposal MUST include this YAML frontmatter at the top:
+
+```yaml
+---
+name: {product-name}
+product_type: {software|service|hybrid}
+interface: {none|standard|full}
+created_at: {YYYY-MM-DD}
+approved: false
+---
+```
+
+### product_type options:
+
+| Type | Description | Testing Skill Activated? |
+|------|-------------|--------------------------|
+| `software` | Codebase product (web, mobile, CLI, library) | ✅ Yes — cali-testing-ai-code |
+| `service` | Consulting, managed, or operational service | ❌ No |
+| `hybrid` | Service + software components | ✅ Yes — cali-testing-ai-code |
+
+**Decision rule:** If the outcome includes code that will be committed to a repository, use `software` or `hybrid`.
+
+### When to ask:
+
+Use `ask_user_question` to determine `product_type` if ambiguous:
+
+```typescript
+ask_user_question({
+  questions: [{
+    question: "What type of product is this?",
+    header: "Product Type",
+    options: [
+      { label: "Software (codebase)", description: "Web app, mobile, CLI tool, library. Triggers AI-aware testing strategy." },
+      { label: "Service (managed)", description: "Consulting, managed service, operations. No testing strategy." }
+    ]
+  }]
+})
+```

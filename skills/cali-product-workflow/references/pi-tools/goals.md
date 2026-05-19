@@ -28,6 +28,20 @@ pause_goal
 
 ---
 
+## Scope Types
+
+| Type | Description | Executor |
+|------|-------------|----------|
+| `feature` | New functionality | worker |
+| `optimization` | Measurable metric improvement | autoresearch |
+| `spike` | Research/prototype | scout + researcher |
+| `test-unit` | Unit tests with mutation validation | worker |
+| `test-integration` | Integration tests with real dependencies | worker |
+| `test-security` | SAST and security gates | worker |
+| `test-behavior` | Behavioral testing for agent workflows | worker |
+
+---
+
 ## Pattern for Scope Execution
 
 ```bash
@@ -59,6 +73,34 @@ For each scope in approved spec-tech:
   Files in scope: {from plan}
   Constraints: tests must pass
 ```
+
+### Test Scope Goals (test-* scopes)
+
+```bash
+/sisyphus Scope: test-unit-[feature-name]
+  Objective: Generate unit tests with mutation validation
+  DoD: mutation_score >= 70% (critical) or 50% (standard)
+  
+/sisyphus Scope: test-integration-[feature-name]
+  Objective: Integration tests with real dependencies
+  DoD: All DB/API boundaries tested, no over-mocking
+  
+/sisyphus Scope: test-security-[feature-name]
+  Objective: Security scanning for critical paths
+  DoD: security_findings == 0, CVSS < 7.0
+  
+/sisyphus Scope: test-mutation-[feature-name]
+  Objective: Mutation testing validation
+  DoD: Mutation score meets target threshold
+```
+
+### Testing Gates
+
+| Gate | Condition | Action |
+|------|-----------|--------|
+| Mutation Score | < target | 🔴 BLOCK |
+| Security | > 0 critical | 🔴 BLOCK |
+| Flaky Rate | > 5% | 🟡 WARN |
 
 ---
 

@@ -1,9 +1,10 @@
 ---
 name: cali-scope-executor
 description: >
-  [Cali] Reads an approved product plan with typed scopes (feature, optimization, spike)
+  [Cali] Reads an approved product plan with typed scopes (feature, optimization, spike, test-*)
   and routes each scope to its correct executor. Acts as the autonomous overnight
   "set and forget" orchestrator — the pi equivalent of /goal for approved plans.
+  For test-* scopes, enforces hard blocks (mutation score, security gates).
 ---
 
 # Execution Executor
@@ -26,6 +27,10 @@ The plan must contain scopes with type annotations:
 - `[TYPE] feature` — implement new functionality
 - `[TYPE] optimization` — improve a measurable metric (must include `[METRIC]`)
 - `[TYPE] spike` — research or prototype
+- `[TYPE] test-unit` — unit tests with mutation validation
+- `[TYPE] test-integration` — integration tests with real dependencies
+- `[TYPE] test-security` — SAST and security gates
+- `[TYPE] test-behavior` — behavioral testing for agent workflows
 
 If the plan has the optional **"Execution routing"** section (from cali-product-workflow), use it directly. Otherwise, infer routing from `[TYPE]` tags.
 
@@ -91,6 +96,10 @@ For each scope in the plan:
 | `optimization` | `worker` → **worker** (override) |
 | `spike` | *absent* → scout + researcher |
 | `spike` | `research` → **research loop** (override, rare) |
+| `test-unit` | worker + mutation validation |
+| `test-integration` | worker + real dependencies |
+| `test-security` | worker + SAST gates |
+| `test-behavior` | worker + behavioral testing |
 
 ### Step 2c: Report the execution plan
 
