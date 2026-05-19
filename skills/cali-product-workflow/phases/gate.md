@@ -1,6 +1,8 @@
-## Phase 6: Review Gate
+## Phase 5: Review Gate
 
 > **Part of cali-product-workflow** — See [`SKILL.md`](./SKILL.md) for phase sequence, safety rules, and capability reference.
+
+> **This is Phase 5** in the workflow sequence, after Plan Critique and before Scope Adjustment.
 
 ### 6x. Claim Verification (before the Gate)
 

@@ -1,9 +1,10 @@
-## Phase 8: Supervisor + Execution
+## Phase 11: Supervisor + Execution
 
 > **Part of cali-product-workflow** — See [`SKILL.md`](./SKILL.md) for phase sequence, safety rules, and capability reference.
 
 ### ⚠️ Activate the supervisor ONLY during execution
-**Never activate during Phases 3-7.** The supervisor would re-submit Plannotator.
+**Never activate during Phases 3-10.** The supervisor would re-submit Plannotator.
+**Activate in Phase 11 only** — when starting scope execution.
 
 ### 6a. Git Worktree Check (before executing scopes)
 

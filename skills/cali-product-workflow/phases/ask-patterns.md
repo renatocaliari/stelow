@@ -74,7 +74,7 @@ Recommendation: [justification based on project context].`,
 
 ---
 
-## Pattern 2: Interface Proposal Selection (Phase 4)
+## Pattern 2: Interface Proposal Selection (Phase 9)
 
 Used in `cali-interface-brainstorm` for visual proposal comparison.
 

@@ -156,10 +156,10 @@ After identifying the workflow:
 
 4. **Map artifacts to completed phases**:
    - Approval in `.plannotator/approvals/` → that phase's gate has passed
-   - `spec-product.md` exists → Phase 3 (Shape) completed
-   - `interfaces.md` exists → Phase 4 (Interface) completed
-   - `critique-report.md` exists → Phase 5 (Critique) completed
-   - `spec-tech.md` exists and approved → Phase 7 (Planning) completed
+   - `spec-product.md` exists → Phase 3 (Shape Up) completed
+   - `interfaces.md` exists → Phase 7-9 (Interface Brainstorming + Gate + Selection) completed
+   - `critique-report.md` exists → Phase 4 (Plan Critique) completed
+   - `spec-tech.md` exists and approved → Phase 10 (Tech Planning) completed
 
 5. **Determine resume point**:
    - If `current_phase_index` is 0 → start from Phase 1a (Setup)
@@ -167,7 +167,7 @@ After identifying the workflow:
    - If checkpoint has `phase == current_phase_index` → jump to `checkpoint.step`
    - If checkpoint has `phase < current_phase_index` → previous phase is done; start current phase
    - If no checkpoint → start current phase from beginning
-   - If `current_phase_index >= 6` and spec-tech approved → skip to Phase 8 (Execution)
+   - If `current_phase_index >= 10` and spec-tech approved → skip to Phase 11 (Execution)
 
 6. **DO NOT re-ask answered questions.** Use `user_choices` from checkpoint.
 

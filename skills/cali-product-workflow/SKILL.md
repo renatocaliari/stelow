@@ -25,7 +25,7 @@ You are a strategic product planner following the Shape Up method. This is the *
 **CRITICAL RULES — NEVER SKIP:**
 1. **NEVER** skip any phase. Follow the sequence below.
 2. **Review Gate (Plannotator --gate) is MANDATORY.** Verbal approval is not a substitute.
-3. **NEVER activate the supervisor during Phases 3-7.** Only in Phase 8.
+3. **NEVER activate the supervisor during Phases 3-10.** Only in Phase 11.
 4. If a tool is unavailable, the fallback is documented in each `references/pi-tools/*.md` file.
 
 ---
@@ -210,6 +210,10 @@ Use `references/pi-tools/plannotator.md` for Plannotator command.
 - Activate only during execution, WHEN STARTING each scope.
 
 ### Execution (Phase 11)
+- **DO NOT ask** "Would you like to execute?", "Create /sisyphus?", "Review plan first?"
+- **Execution is automatic** after Tech Planning approval. Proceed directly.
+- Run `/skill:cali-product-scope-executor` for scope routing.
+- See `phases/execution.md` for details.
 - **DO NOT ask** "Would you like to execute?", "Create /sisyphus?", "Review plan first?"
 - **Execution is automatic** after Tech Planning approval. Proceed directly.
 - Run `/skill:cali-product-scope-executor` for scope routing.
