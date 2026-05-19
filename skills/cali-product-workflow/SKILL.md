@@ -148,14 +148,15 @@ Phase 11: Execution
 
 | User selection | Phases that run automatically |
 |---|---|
-| Shape Up only | Shape Up → Plan Critique → **Gate** → **Scope** → Tech Planning |
-| Shape Up + Interface | Shape Up → Plan Critique → **Gate** → **Scope** → Interface → **Interface Gate** → Selection → Tech Planning |
-| Tech Planning only | Tech Planning (with embedded Gate) → Execution |
+| Shape Up only | Shape Up → Plan Critique → **Gate** → **Scope** → Tech Planning → **Execution** |
+| Shape Up + Interface | Shape Up → Plan Critique → **Gate** → **Scope** → Interface → **Interface Gate** → Selection → Tech Planning → **Execution** |
+| Tech Planning only | Tech Planning (with embedded Gate) → **Execution** |
 
 **Plan Critique** runs automatically before every Gate.
 **Gate** (Plannotator --gate) never skips — visual pause is mandatory.
 **Scope Adjustment** happens after Gate approval, via ask (no Plannotator re-run).
 **Interface Gate** shows all proposals visually before selection.
+**Execution** runs automatically after Tech Planning — DO NOT ask user what to do next.
 
 ---
 
@@ -184,9 +185,15 @@ Use `references/pi-tools/plannotator.md` for Plannotator command.
 - **Never activate during Phases 3-10.** The supervisor would re-submit Plannotator.
 - Activate only during execution, WHEN STARTING each scope.
 
+### Execution (Phase 11)
+- **DO NOT ask** "Would you like to execute?", "Create /sisyphus?", "Review plan first?"
+- **Execution is automatic** after Tech Planning approval. Proceed directly.
+- Run `/skill:cali-product-scope-executor` for scope routing.
+- See `phases/execution.md` for details.
+
 ### Worktree
-- Optional in Phase 11. Ask the user.
-- Workflows with 1 scope or no code changes can skip.
+- Optional in Phase 11. Ask the user only if modifying code in shared repo AND parallel workflows exist.
+- Single-scope workflows can skip worktree.
 
 ---
 

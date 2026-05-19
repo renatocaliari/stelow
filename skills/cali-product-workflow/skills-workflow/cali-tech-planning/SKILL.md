@@ -107,6 +107,18 @@ Tech plan is saved to:
 .cali-product-workflow/{YYYY-MM-DD}/{_dir}/plans/spec-tech_{v}.md
 ```
 
+## After Tech Planning — EXECUTE AUTOMATICALLY
+
+**DO NOT ask user what to do next. Execution is automatic.**
+
+After Plannotator approval on spec-tech_v{N}.md:
+1. Run `/skill:cali-product-scope-executor` for scope routing
+2. Execute scopes based on type:
+   - `feature` → `/sisyphus` + `/supervise`
+   - `optimization` → `/skill:autoresearch-create`
+
+See `phases/execution.md` for full execution flow.
+
 ## Related Skills
 
 - **cali-shape-up**: Produces the shaped proposal

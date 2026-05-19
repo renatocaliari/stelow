@@ -96,4 +96,53 @@ Proceed directly to scope execution in the current directory.
 > **Tip:** `/supervise` is especially useful for long scopes where the LLM
 > may forget the original objective. Activate WHEN STARTING the scope, not before.
 
-After tech planning, run `/skill:cali-product-scope-executor`
+## Phase 11: Execution — AUTOMATIC
+
+> **CRITICAL: After Tech Planning approval, execution is MANDATORY.**
+> Do NOT ask the user "what to do next". The workflow proceeds automatically.
+
+### Execution Flow
+
+After Plannotator approval on spec-tech_v{N}.md:
+
+1. **Worktree check** (if modifying code in shared repo)
+2. **Route to executor** based on scope type:
+
+| Scope Type | Executor | Command |
+|------------|----------|--------|
+| `feature` | `/sisyphus` + `/supervise` | `/skill:cali-product-scope-executor` |
+| `optimization` | `/skill:autoresearch-create` | `/skill:autoresearch-create` |
+| `spike` | `/sisyphus` + `/supervise` | `/skill:cali-product-scope-executor` |
+
+### Executing Scopes
+
+**Run `/skill:cali-product-scope-executor`** — this routes each scope to its correct executor.
+
+**For feature scopes:**
+```bash
+/sisyphus Scope: [scope-name]
+  Objective: {from scope description}
+  Done when:
+  - [ ] Criterion 1
+  - [ ] Criterion 2
+/supervise outcome="Execute scope '[scope-name]' per spec-tech.md. DoD: {DoD}. Do not deviate."
+```
+
+**For optimization scopes:**
+```bash
+/skill:autoresearch-create
+```
+
+### ⚠️ NEVER ASK
+
+After Tech Planning approval, **DO NOT** ask:
+- "Would you like to execute now?"
+- "Create /sisyphus goal?"
+- "Review plan first?"
+- Any variation of "what would you like to do next"
+
+**The workflow proceeds automatically to execution.**
+
+### Worktree (optional)
+
+Only ask about worktree if modifying code in shared repository AND multiple workflows run in parallel.
