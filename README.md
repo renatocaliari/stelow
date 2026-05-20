@@ -106,25 +106,27 @@ Superpowers brainstorming: proposes 2-3 approaches in text (200-300 words each),
 
 This workflow: generates 5 interface archetypes as ASCII art with flows and trade-offs in seconds, then LLM creates a hybrid combining best points for the context.
 
-**vs. BMAD Method (45K ⭐) and Superpowers (180K ⭐):**
+**vs. [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) (47K ⭐) and [Superpowers](https://github.com/obra/superpowers) (199K ⭐):**
 
 Both frameworks enforce structure for general software engineering. Here's what differentiates this workflow:
 
-| Aspect | BMAD Method | Superpowers | pi-product-workflow |
-|--------|-------------|--------------|---------------------|
-| **Focus** | Enterprise team simulation with 12+ agent personas | TDD-first engineering methodology | Product planning + domain-specific knowledge |
-| **Scope Definition** | General user stories | Implementation plans | Shape Up with IN/OUT boundaries |
-| **Domain Knowledge** | Generic workflows | Code patterns | Job To Be Done, Pricing, Trust, Ads, Open Source, etc. |
-| **Review** | Manual or configured | Subagent quality check | Plannotator visual gate with point-by-point comments |
-| **Interface** | 1 UX design workflow | 2-3 text approaches + optional browser | 5 ASCII archetypes + LLM hybrid |
-| **Testing** | Manual/sprint-based | TDD-first (subagent) | Context-aware: TDD for critical paths, mutation targets, greenfield/brownfield |
+| Aspect | [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) | [Superpowers](https://github.com/obra/superpowers) | pi-product-workflow |
+|--------|---|---|
+| **Stars** | ~47K | ~199K | — |
+| **Focus** | Enterprise team simulation (12+ workflows) | TDD-first engineering methodology | Product planning + domain-specific knowledge |
+| **Phases** | 4 (Analysis → Planning → Solutioning → Implementation) | Skills system (14 skills) | 6 (Setup → Strategic → Shape Up → Interface → Critique → Tech) |
+| **Scope Definition** | User stories, epics | Implementation plans | Shape Up with IN/OUT boundaries |
+| **Domain Knowledge** | Generic product workflows | Code patterns, best practices | Job To Be Done, Pricing, Trust, Ads, Open Source, Health, Marketplace |
+| **Review** | Manual or configured checklists | Subagent quality check | Plannotator visual gate with point-by-point comments |
+| **Interface** | 1 UX design workflow (ux-spec.md) | 2-3 text approaches + optional browser | 5 ASCII archetypes + LLM hybrid creation |
+| **Testing** | Sprint-based (dev-story + code-review) | TDD-first with subagents | Context-aware: TDD critical paths, mutation targets (70/50/30%), greenfield/brownfield |
 
 **Key differentiators:**
 
-- **Product domain libraries** (8 domains) auto-detected from your language — not generic engineering
+- **Product domain libraries** — 8 domains auto-detected from your language (Pricing, Trust, Ads, Promotions, Open Source, Health, Marketplace, Business Models)
 - **Visual review gate** — Plannotator opens the full plan in a visual interface for comments, not just chat
-- **Interface exploration** — 5 approaches in ASCII art, then LLM creates hybrid combining best points for the context
-- **Shape Up methodology** — IN/OUT scope boundaries, betting table concepts, aphorisms
+- **Interface exploration** — 5 approaches in ASCII art with flows and trade-offs, then LLM creates hybrid combining best points for the context
+- **[Shape Up](https://basecamp.com/shapeup) methodology** — IN/OUT scope boundaries, betting table concepts, aphorisms
 - **Typed technical scopes** — feature, spike, optimize, test-* with dependency mapping and sequencing
 - **Real-time TUI tracking** — see workflow state as it progresses
 
