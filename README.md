@@ -26,8 +26,8 @@ And the workflow begins asking questions, exploring scope, shaping the proposal,
 
 ### 📚 Published Work
 
-- 📖 [e-book] *Inovação baseada em Jobs To Be Done* (Innovation based on Jobs To Be Done)
-- 📖 [e-book] *A Arte da Experimentação: Da Ideia ao Produto* (The Art of Experimentation: From Idea to Product — Innovate with a simplified process and AI assistance)
+- 🇧🇷 [e-book, Brazilian Portuguese] *Inovação baseada em Jobs To Be Done* (Innovation based on Jobs To Be Done)
+- 🇧🇷 [e-book, Brazilian Portuguese] *A Arte da Experimentação: Da Ideia ao Produto* (The Art of Experimentation: From Idea to Product — Innovate with a simplified process and AI assistance)
 
 ### 💼 Experience
 
@@ -39,7 +39,7 @@ And the workflow begins asking questions, exploring scope, shaping the proposal,
 | Site | Description |
 |------|-------------|
 | [timeproduto.com.br](https://www.timeproduto.com.br/) | Product process divided into stages, with AI tools and prompts for each stage |
-| [calirenato82.substack.com](https://calirenato82.substack.com) | Blog on product topics, published prompts, and free e-books |
+| [calirenato82.substack.com](https://calirenato82.substack.com) | Blog exploring AI, organizational culture, daily philosophy, narrative practices, and product thinking — with published prompts and free e-books |
 
 ## Why This Exists
 
@@ -101,10 +101,6 @@ These frameworks enforce structure too, but for general software engineering. Th
 - Product-specific skills — Job To Be Done, Pricing, Trust Building, Ads, Promotions, etc.
 - Interface exploration with ASCII art — visualize 5 approaches in seconds, then LLM creates hybrid combining best points for the context
 - Works for **greenfield** (new products) and **brownfield** (existing products)
-
-#--|-------------|
-| **[timeproduto.com.br](https://www.timeproduto.com.br/)** | Product process divided into stages, with AI tools and prompts for each stage |
-| **[calirenato82.substack.com](https://calirenato82.substack.com)** | Blog on product topics, published prompts, and free e-books |
 
 ---
 
