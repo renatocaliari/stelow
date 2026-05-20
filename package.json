@@ -75,7 +75,8 @@
     "cali-product-open-source": "*",
     "cali-product-pricing": "*",
     "cali-product-promotions": "*",
-    "cali-product-trust-building": "*"
+    "cali-product-trust-building": "*",
+    "context-mode": ">=1.0.0"
   },
   "publishConfig": {
     "access": "public"
