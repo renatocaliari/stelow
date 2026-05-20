@@ -186,6 +186,7 @@ install_pi_packages() {
 
   log_info "Installing Pi-specific packages..."
 
+  # Dual-install pattern: core + lightweight stub extension
   local pi_packages=(
     "pi-subagents"
     "pi-goal"
@@ -194,21 +195,44 @@ install_pi_packages() {
     "pi-autoresearch"
   )
 
+  # 1. Install core package globally (if not already installed)
+  if [[ "$dry_run" == "true" ]]; then
+    log_info "[dry-run] Would install: @renatocaliari/pi-product-workflow"
+  else
+    if command -v pi &>/dev/null; then
+      log_info "Installing core package via Pi..."
+      pi install npm:@renatocaliari/pi-product-workflow 2>/dev/null || \
+        log_warn "Could not install core package via pi install"
+    else
+      log_warn "pi command not found. Install manually or run in Pi environment."
+    fi
+  fi
+
+  # 2. Install lightweight stub extension
+  if [[ "$dry_run" == "true" ]]; then
+    log_info "[dry-run] Would install: @renatocaliari/cali-product-workflow-pi (stub extension)"
+  else
+    if command -v pi &>/dev/null; then
+      log_info "Installing lightweight Pi extension..."
+      pi install npm:@renatocaliari/cali-product-workflow-pi 2>/dev/null || \
+        log_warn "Could not install Pi extension via pi install"
+    fi
+  fi
+
+  # 3. Install supporting packages
   for pkg in "${pi_packages[@]}"; do
     if [[ "$dry_run" == "true" ]]; then
       log_info "[dry-run] Would install: $pkg"
     else
       if command -v pi &>/dev/null; then
         log_info "Installing $pkg..."
-        pi package add "$pkg" 2>/dev/null || log_warn "Could not install $pkg via pi package add"
-      else
-        log_warn "pi command not found. Install $pkg manually or run in Pi environment."
+        pi install npm:"$pkg" 2>/dev/null || log_warn "Could not install $pkg via pi install"
       fi
     fi
   done
 
   if [[ "$dry_run" != "true" ]]; then
-    log_success "Pi packages installation complete"
+    log_success "Pi installation complete (core + extension + packages)"
   fi
 }
 

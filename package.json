@@ -24,14 +24,9 @@
     "url": "https://github.com/cali/pi-product-workflow/issues"
   },
   "exports": {
-    "./skills": "./skills",
-    "./cli-tools": "./cli-tools",
-    "./skills-workflow": "./skills/cali-product-workflow/skills-workflow",
-    "./skills-strategic-analysis": "./skills/cali-product-workflow/skills-strategic-analysis",
-    "./skills-execution": "./skills/cali-product-workflow/skills-execution",
-    "./skills-domain-libraries": "./skills/cali-product-workflow/skills-domain-libraries",
-    "./extensions": "./extensions",
-    "./package.json": "./package.json"
+    ".": "./extensions/cali-product-workflow/index.js",
+    "./skills": "./skills/",
+    "./extensions": "./extensions"
   },
   "peerDependencies": {
     "typebox": "*"
@@ -68,10 +63,10 @@
     "node": ">=20.0.0"
   },
   "files": [
+    "extensions/cali-product-workflow/",
     "skills/",
-    "extensions/",
     "scripts/",
-    "tests/",
+    "install.sh",
     "cali-product-workflow.schema.json",
     "README.md",
     "LICENSE",

@@ -4,12 +4,22 @@ All notable changes to `@renatocaliari/pi-product-workflow` will be documented i
 
 ## [Unreleased]
 
+### Added
+
+- **Structured exports**: Added exports field for cleaner imports
+  - `.` → main extension entry point
+  - `./skills` → skills directory
+  - `./extensions` → extensions directory
+
+- **`files` field**: Explicit list of published files for cleaner npm package
+  - Only includes necessary files (extensions, skills, scripts, config)
+  - Excludes empty directories and development artifacts
+
 ### Changed
 
 - **Multi-CLI support**: Package now installs on any CLI (pi, opencode, claude-code, codex)
   - Removed `pi:` field from package.json
   - Moved Pi-specific peerDependencies to `optionalPeerDependencies`
-  - Added `exports` field for skills and cli-tools subpaths
   - Updated description to reflect multi-CLI support
   - Removed "pi-package" from keywords
 

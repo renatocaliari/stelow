@@ -44,7 +44,7 @@ describe('Sandbox Install Verification', () => {
     it('should declare all skill exports', () => {
       const pkg = JSON.parse(readFileSync(join(PROJECT_ROOT, 'package.json'), 'utf-8'));
       expect(pkg.exports['./skills']).toBeDefined();
-      expect(pkg.exports['./skills-workflow']).toBeDefined();
+      expect(pkg.exports['./extensions']).toBeDefined();
     });
   });
 
@@ -178,7 +178,7 @@ describe('Sandbox Install Verification', () => {
       const pkg = JSON.parse(readFileSync(join(PROJECT_ROOT, 'package.json'), 'utf-8'));
       expect(pkg.files).toBeDefined();
       expect(pkg.files).toContain('skills/');
-      expect(pkg.files).toContain('extensions/');
+      expect(pkg.files).toContain('extensions/cali-product-workflow/');
       expect(pkg.files).toContain('scripts/');
     });
 
