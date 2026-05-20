@@ -70,7 +70,10 @@
     "cali-product-workflow.schema.json",
     "README.md",
     "LICENSE",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    ".claude-plugin/",
+    ".codex-plugin/",
+    ".opencode-plugin/"
   ],
   "scripts": {
     "test": "vitest run",

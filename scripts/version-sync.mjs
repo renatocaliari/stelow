@@ -26,6 +26,11 @@ const FILES_TO_SYNC = [
     source: join(ROOT, "package.json"),
     targets: [
       join(ROOT, "extensions/cali-product-workflow-pi/package.json"),
+      join(ROOT, ".claude-plugin/plugin.json"),
+      join(ROOT, ".claude-plugin/marketplace.json"),
+      join(ROOT, ".codex-plugin/plugin.json"),
+      join(ROOT, ".codex-plugin/marketplace.json"),
+      join(ROOT, ".opencode-plugin/plugin.json"),
     ],
   },
 ];

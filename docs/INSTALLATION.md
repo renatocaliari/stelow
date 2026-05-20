@@ -7,13 +7,36 @@ This guide covers installing cali-product-workflow for different AI coding agent
 pi-product-workflow uses a dual-install pattern (same as context-mode):
 
 ```
-npm install -g @renatocaliari/pi-product-workflow  → Core (skills, adapters, CLI tools)
-pi install npm:@renatocaliari/cali-product-workflow-pi  → Stub extension (Pi integration)
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Core Package (all CLIs)                          │
+│         npm install -g @renatocaliari/pi-product-workflow           │
+│         → Skills, adapters, CLI tools (markdown files)               │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Pi Stub Extension (Pi only)                      │
+│         pi install npm:@renatocaliari/cali-product-workflow-pi      │
+│         → Lightweight Pi integration (references core)              │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                   Plugin Structures (all CLIs)                       │
+│         .claude-plugin/  → Claude Code marketplace                  │
+│         .codex-plugin/   → Codex plugin registry                   │
+│         .opencode-plugin/ → OpenCode plugin                        │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-This allows:
-- **Core package**: Works on all CLIs (skills are markdown)
-- **Stub extension**: Lightweight Pi integration without duplicating core
+### Package Contents
+
+| Directory | Purpose | CLIs |
+|-----------|---------|------|
+| `skills/` | Product workflow skills (markdown) | All |
+| `adapters/` | CLI adapters (pi, opencode, claude-code, codex) | All |
+| `.claude-plugin/` | Claude Code marketplace manifest | Claude Code |
+| `.codex-plugin/` | Codex plugin manifest | Codex |
+| `.opencode-plugin/` | OpenCode plugin manifest | OpenCode |
+| `extensions/cali-product-workflow-pi/` | Pi stub extension | Pi |
 
 ---
 
@@ -67,36 +90,113 @@ Works on any system with Node.js >= 20.0.0. Skills are markdown files.
 
 ### opencode
 
+Add to `opencode.json`:
+
 ```json
 {
   "plugins": ["@renatocaliari/pi-product-workflow"]
 }
 ```
 
+Or via CLI:
+
+```bash
+opencode plugin add @renatocaliari/pi-product-workflow
+```
+
 ### claude-code
 
 ```bash
-/plugin marketplace add renatocaliari/pi-product-workflow
-/plugin install pi-product-workflow@pi-product-workflow
+# Via marketplace (recommended)
+claude /plugin marketplace add renatocaliari/pi-product-workflow
+claude /plugin install cali-product-workflow@cali-product-workflow
+
+# Or install locally
+claude /plugin install ./path/to/package
 ```
 
 ### codex
 
 ```bash
+# Via plugin marketplace
 codex plugin marketplace add renatocaliari/pi-product-workflow
+codex plugin install cali-product-workflow
+
+# Or install locally
+codex plugin install ./path/to/package
 ```
 
 ---
 
 ## Installation Methods Summary
 
-| CLI | Method | Packages |
-|-----|--------|----------|
-| **pi** | Dual-install | Core + Stub Extension |
-| **opencode** | Plugin | Core package |
-| **claude-code** | Marketplace | Core package |
-| **codex** | Plugin | Core package |
-| **generic** | npm | Core package only |
+| CLI | Method | Packages | Plugin Structure |
+|-----|--------|----------|------------------|
+| **pi** | Dual-install | Core + Stub Extension | `extensions/cali-product-workflow-pi/` |
+| **opencode** | Plugin | Core package | `.opencode-plugin/plugin.json` |
+| **claude-code** | Marketplace | Core package | `.claude-plugin/` |
+| **codex** | Plugin | Core package | `.codex-plugin/` |
+| **generic** | npm | Core package only | N/A |
+
+---
+
+## Plugin Manifests
+
+### Claude Code (`.claude-plugin/`)
+
+```
+.claude-plugin/
+├── plugin.json      # Main manifest
+├── marketplace.json  # Marketplace entry
+└── .claude/
+    └── skills/
+        └── cali-product-workflow/
+```
+
+**plugin.json structure:**
+```json
+{
+  "name": "@renatocaliari/cali-product-workflow",
+  "version": "0.2.0-alpha",
+  "description": "Product workflow for AI coding agents",
+  "skills": "./.claude/skills/"
+}
+```
+
+### Codex (`.codex-plugin/`)
+
+```
+.codex-plugin/
+├── plugin.json      # Main manifest
+└── marketplace.json # Marketplace entry
+```
+
+**plugin.json structure:**
+```json
+{
+  "name": "@renatocaliari/cali-product-workflow",
+  "version": "0.2.0-alpha",
+  "description": "Product workflow for AI coding agents",
+  "skills": "./skills/"
+}
+```
+
+### OpenCode (`.opencode-plugin/`)
+
+```
+.opencode-plugin/
+└── plugin.json      # Main manifest
+```
+
+**plugin.json structure:**
+```json
+{
+  "name": "@renatocaliari/cali-product-workflow",
+  "version": "0.2.0-alpha",
+  "description": "Product workflow for AI coding agents",
+  "skills": "./skills/"
+}
+```
 
 ---
 
@@ -158,6 +258,19 @@ You should see:
 - `@renatocaliari/pi-product-workflow` (core)
 - `@renatocaliari/cali-product-workflow-pi` (stub)
 
+### CLI-specific verification
+
+```bash
+# OpenCode
+opencode plugin list | grep product-workflow
+
+# Claude Code
+claude /plugin list | grep product-workflow
+
+# Codex
+codex plugin list | grep product-workflow
+```
+
 ---
 
 ## Troubleshooting
@@ -174,6 +287,10 @@ pi list | grep product-workflow
 Restart the CLI after installation:
 ```bash
 pi --reload
+# or
+opencode --reload
+# or
+claude /reload-plugins
 ```
 
 ### Auto-trigger not working
@@ -196,6 +313,7 @@ cd ~/pi-product-workflow
 
 ### Manual
 
+**Pi (dual-install):**
 ```bash
 # Remove packages (dual-install)
 pi remove npm:@renatocaliari/pi-product-workflow
@@ -206,6 +324,26 @@ rm ~/.pi/agent/AGENTS.md
 
 # Remove supporting packages (optional)
 pi remove npm:pi-subagents npm:pi-goal npm:@plannotator/pi-extension
+```
+
+**OpenCode:**
+```bash
+opencode plugin remove @renatocaliari/pi-product-workflow
+```
+
+**Claude Code:**
+```bash
+claude /plugin uninstall cali-product-workflow
+```
+
+**Codex:**
+```bash
+codex plugin uninstall cali-product-workflow
+```
+
+**Generic:**
+```bash
+npm uninstall -g @renatocaliari/pi-product-workflow
 ```
 
 ---
@@ -221,6 +359,19 @@ cd pi-product-workflow
 # For Pi
 pi install .
 
-# For other CLIs
+# For OpenCode/Claude Code/Codex
 npm install -g .
 ```
+
+---
+
+## Version Sync
+
+When you publish a new version, the `npm version` script automatically syncs version numbers to:
+
+- `extensions/cali-product-workflow-pi/package.json`
+- `.claude-plugin/plugin.json`
+- `.claude-plugin/marketplace.json`
+- `.codex-plugin/plugin.json`
+- `.codex-plugin/marketplace.json`
+- `.opencode-plugin/plugin.json`
