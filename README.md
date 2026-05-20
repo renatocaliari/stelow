@@ -10,13 +10,13 @@ This package brings Shape Up's betting table methodology to pi.dev. Instead of o
 
 - [🚀 Quick Start](#-quick-start)
 - [📦 Installation](#-installation)
+- [🔧 Dependencies](#-dependencies)
 - [📁 Artifact Directory](#-artifact-directory)
 - [🔄 Workflow Flow](#-workflow-flow)
 - [🎮 Commands](#-commands)
 - [🖥️ TUI Visual](#️-tui-visual)
 - [🧪 Testing Strategy](#-testing-strategy-software-products-only)
 - [📋 Skills](#-skills-16)
-- [🔧 Dependencies](#-dependencies)
 - [📊 Version](#-version)
 - [License](#license)
 
@@ -24,21 +24,7 @@ This package brings Shape Up's betting table methodology to pi.dev. Instead of o
 
 ## 🚀 Quick Start
 
-```bash
-# Start a new workflow (with file references and draft text)
-/product-workflow-start @brief.md "additional context"
-
-/product-workflow-start @spec.md @requirements.md "OAuth login flow"
-
-# Or run the skill directly
-/skill:cali-product-workflow
-```
-
 ---
-
-
----
-
 
 ## 📦 Installation
 
@@ -109,6 +95,30 @@ pi -e npm:@renatocaliari/pi-product-workflow
 ---
 
 
+
+---
+
+## 🔧 Dependencies
+
+| Extension | Package | Purpose |
+|-----------|---------|---------|
+| **pi-subagents** | `pi-subagents` | Parallel execution |
+| **pi-goal** | `@capyup/pi-goal` | `/goal`, `/sisyphus` modes |
+| **plannotator** | `@plannotator/pi-extension` | Plan review with `--gate` |
+| **autoresearch** | `pi-autoresearch` | Optimization experiments |
+| **ask-user-question** | `@juicesharp/rpiv-ask-user-question` | Structured questions |
+| **intercom** | `pi-intercom` | Session messaging |
+| **supervisor** | `pi-supervisor` | Outcome steering |
+
+---
+
+
+---
+
+
+
+---
+
 ## 📁 Artifact Directory
 
 ```
@@ -131,6 +141,9 @@ pi -e npm:@renatocaliari/pi-product-workflow
 ---
 
 
+
+
+---
 
 ## 🔄 Workflow Flow
 
@@ -155,7 +168,7 @@ pi -e npm:@renatocaliari/pi-product-workflow
                         │
                         ▼
  ┌─────────────────────────────────────────────────────────────┐
- │  3. Shape Up                                                │
+ │  3. Shape (Shape Up)                                                │
  │     Define: problem → solution → scope → rabbit holes       │
  └──────────────────────┬──────────────────────────────────────┘
                         │
@@ -215,17 +228,22 @@ pi -e npm:@renatocaliari/pi-product-workflow
 
 Invoke via `/skill:cali-product-{name}` when relevant during planning/execution.
 
-┌─────────────────────────────────────────────────────────────┐
-│  ┌──────────┐ ┌───────────────┐ ┌─────────┐ ┌────────────┐ │
-│  │   Ads    │ │Business Models│ │ Pricing │ │ Promotions │ │
-│  └──────────┘ └───────────────┘ └─────────┘ └────────────┘ │
-│  ┌──────────┐ ┌───────────────┐ ┌─────────┐ ┌────────────┐ │
-│  │  Health  │ │  Marketplace  │ │Open Src │ │Trust Build │ │
-│  └──────────┘ └───────────────┘ └─────────┘ └────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+```
+┌──────────────────────────────────────────────────────────────┐
+│  ┌──────────┐ ┌───────────────┐ ┌─────────┐ ┌────────────┐  │
+│  │   Ads    │ │Business Models│ │ Pricing │ │Promotions │  │
+│  └──────────┘ └───────────────┘ └─────────┘ └────────────┘  │
+│  ┌──────────┐ ┌───────────────┐ ┌─────────┐ ┌────────────┐  │
+│  │  Health  │ │  Marketplace  │ │Open Src │ │Trust Build│  │
+│  └──────────┘ └───────────────┘ └─────────┘ └────────────┘  │
+└──────────────────────────────────────────────────────────────┘
+```
 
 > **Why this matters:** Scope is shaped BEFORE planning, not after. Every plan gets adversarial critique. Gate approval prevents wasted technical work.
 
+
+
+---
 
 ## 🎮 Commands
 
@@ -257,6 +275,9 @@ All commands use the `/product-workflow-` prefix. Short `/pw:` aliases work too.
 
 ---
 
+
+
+---
 
 ## 🖥️ TUI Visual
 
@@ -302,6 +323,9 @@ All commands use the `/product-workflow-` prefix. Short `/pw:` aliases work too.
 ---
 
 
+
+---
+
 ## 🧪 Testing Strategy (Software Products Only)
 
 When `product_type: software` or `product_type: hybrid`, the workflow auto-activates `cali-testing-ai-code` skill.
@@ -345,6 +369,9 @@ flaky_rate: > 5% → WARN
 
 ---
 
+
+
+---
 
 ## 📋 Skills (16)
 
@@ -394,23 +421,8 @@ flaky_rate: > 5% → WARN
 ---
 
 
-## 🔧 Dependencies
-
-| Extension | Package | Purpose |
-|-----------|---------|---------|
-| **pi-subagents** | `pi-subagents` | Parallel execution |
-| **pi-goal** | `@capyup/pi-goal` | `/goal`, `/sisyphus` modes |
-| **plannotator** | `@plannotator/pi-extension` | Plan review with `--gate` |
-| **autoresearch** | `pi-autoresearch` | Optimization experiments |
-| **ask-user-question** | `@juicesharp/rpiv-ask-user-question` | Structured questions |
-| **intercom** | `pi-intercom` | Session messaging |
-| **supervisor** | `pi-supervisor` | Outcome steering |
 
 ---
-
-
----
-
 
 ## 📊 Version
 
@@ -423,6 +435,9 @@ flaky_rate: > 5% → WARN
 
 ---
 
+
+
+---
 
 ## License
 
