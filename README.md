@@ -8,15 +8,6 @@ This package brings [Shape Up](https://basecamp.com/shapeup) methodology to AI c
 
 
 
-### Interface exploration comparison
-
-| Aspect | [Superpowers](https://github.com/obra/superpowers) brainstorming | pi-product-workflow |
-|--------|---|---|
-| **Approaches** | 2-3 options | 5 archetypes |
-| **Format** | Text descriptions (200-300 words each) | ASCII art with flows and trade-offs |
-| **Visual** | Optional browser companion for mockups | Built-in ASCII art generation |
-| **Recommendation** | Agent picks best option | LLM creates hybrid combining best points |
-
 **Key differentiators:**
 
 - **Product domain libraries** — 8 domains auto-detected from your language (Pricing, Trust, Ads, Promotions, Open Source, Health, Marketplace, Business Models)
