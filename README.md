@@ -125,7 +125,7 @@ And the workflow begins asking questions, exploring scope, shaping the proposal,
 - Gate approval via Plannotator — review, comment, approve or reject before implementation
 - Typed scopes for autonomous execution (feature, spike, test-*, optimize)## How We Differ
 
-This workflow focuses on **product planning** rather than pure code generation. Here's how it compares:
+This workflow combines product planning, domain knowledge, and technical execution for digital products. Here's how it compares:
 
 | Aspect | Standard Agent | Heavy Framework | pi-product-workflow |
 |--------|---------------|-----------------|---------------------|
@@ -146,10 +146,6 @@ Both have a "plan" mode, but it's basic — restrict tools and add generic plann
 - **Adversarial plan critique** — catches gaps, risks, and assumptions
 - **Domain libraries** — auto-detect from user input (pricing, ads, trust, etc.)
 - **Visual review gate** — Plannotator opens the full plan for point-by-point comments (not just chat)
-
-
-
-This workflow: generates 5 interface archetypes as ASCII art with flows and trade-offs in seconds, then LLM creates a hybrid combining best points for the context.
 
 **vs. [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) (47K ⭐) and [Superpowers](https://github.com/obra/superpowers) (199K ⭐):**
 
