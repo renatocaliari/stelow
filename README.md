@@ -1,10 +1,110 @@
+# @renatocaliari/pi-product-workflow
+
+**Transform product ideas into approved, testable plans — systematically.**
+
+This package brings Shape Up's betting table methodology to AI coding agents. Instead of open-ended feature lists, you shape proposals with clear scope boundaries, validate them through adversarial critique, and generate typed technical scopes ready for autonomous execution.
+
+---
+
+## Why This Exists
+
+**The Problem:** Building products with AI agents often leads to:
+
+- Scope creep and unclear boundaries
+- Plans without adversarial review
+- Technical work before business validation
+- No systematic testing for AI-generated code
+- Generic workflows that miss product-specific insights
+
+**The Solution:** A structured workflow that:
+
+- ✅ Shapes proposals BEFORE coding (not during)
+- ✅ Reviews every plan through adversarial critique
+- ✅ Auto-detects domain signals and suggests relevant playbooks
+- ✅ Generates typed scopes for autonomous execution
+- ✅ Implements AI-aware mutation testing for software products
+
+**Key Features:**
+- 16 specialized product skills (JTBD, Opportunity Mapping, Product Discovery, pricing strategies, and more)
+- Real-time TUI tracking for workflow state
+- Domain libraries that auto-detect from user input
+- Testing strategy with mutation coverage targets
+
+---
+---
+
+## How We Differ
+
+This workflow focuses on **product planning** rather than pure code generation. Here's how it compares:
+
+| Aspect | Standard Agent | Heavy Framework | pi-product-workflow |
+|--------|---------------|-----------------|---------------------|
+| **Scope** | Open-ended | Full lifecycle | Shaped proposals |
+| **Review** | Manual | Configured | AI-powered critique |
+| **Domain Skills** | None | Generic | Product-specific |
+| **Testing** | Ad-hoc | Configured | AI-aware mutation |
+| **Tracking** | None | Varies | Real-time TUI |
+
+### Key Differences
+
+**vs. Claude Code / OpenCode:**
+- Not just code generation — shapes proposals before coding
+- Built-in adversarial critique for every plan
+- Domain libraries that auto-detect from user input
+
+**vs. BMAD Method / Superpowers:**
+- Lighter framework — only phases you need
+- Product-specific skills (JTBD, Pricing, Trust Building, etc.)
+- Auto-detection of relevant domain playbooks
+
+**vs. Generic pi.extensions:**
+- Structured workflow with clear phases
+- Gate approval before technical work
+- Typed scopes for autonomous execution
+
+### Philosophy
+
+**Traditional AI development:** "Here's what I want. Start coding."
+
+**With pi-product-workflow:** "Shape the proposal. Review the plan. Get approval. Then build."
+
+This prevents wasted technical work by ensuring every feature is:
+1. Clearly scoped with boundaries
+2. Reviewed for gaps and risks
+3. Approved before implementation
+4. Tested with AI-aware mutation coverage
+
+## About the Author
+
+**[Renato Caliari](https://www.linkedin.com/in/calirenato82/)** — Product specialist with hands-on experience:
+
+### 📚 Published Work
+
+- **E-books (Portuguese):**
+  - *Jobs-to-be-Done em Produto Digital*
+  - *Product Discovery com Short Learning Cycles*
+
+### 💼 Experience
+
+- Former **Product Manager** at tech companies
+- **Product Consultant** helping leaders with strategy and teams with processes
+
+### 🌐 Resources
+
+| Site | Description |
+|------|-------------|
+| **[timeproduto.com.br](https://www.timeproduto.com.br/)** | Product process divided into stages, with AI tools and prompts for each stage |
+| **[calirenato82.substack.com](https://calirenato82.substack.com)** | Blog on product topics, published prompts, and free e-books |
+
+---
+
 ## 📋 Table of Contents
 
 - [🚀 Quick Start](#-quick-start)
 - [📦 Installation](#-installation)
 - [🔧 Dependencies](#-dependencies)
 - [📁 Artifact Directory](#-artifact-directory)
-- [🔄 Workflow Flow](#-workflow-flow)
+- [🔄 Process](#-process)
 - [🎮 Commands](#-commands)
 - [🖥️ TUI Visual](#️-tui-visual)
 - [🧪 Testing Strategy](#-testing-strategy-software-products-only)
@@ -15,28 +115,22 @@
 ---
 
 
----
 
 
 
----
 
 
----
 
 ## 🚀 Quick Start
 
 ---
 
 
----
 
 
 
----
 
 
----
 
 ## 📦 Installation
 
@@ -104,21 +198,16 @@ pi -e npm:@renatocaliari/pi-product-workflow
 ---
 
 
----
 
 
 
----
-
-
----
 
 
 
----
 
 
----
+
+
 
 ## 🔧 Dependencies
 
@@ -135,21 +224,16 @@ pi -e npm:@renatocaliari/pi-product-workflow
 ---
 
 
----
 
 
 
----
-
-
----
 
 
 
----
 
 
----
+
+
 
 ## 📁 Artifact Directory
 
@@ -170,24 +254,19 @@ pi -e npm:@renatocaliari/pi-product-workflow
 ---
 
 
----
 
 
 
 
----
-
-
----
 
 
 
----
 
 
----
 
-## 🔄 Workflow Flow
+
+
+## 🔄 Process
 
 ```
 
@@ -316,14 +395,11 @@ Each domain has its own dedicated skill. The LLM automatically detects signals i
 ---
 
 
----
 
 
 
----
 
 
----
 
 ## 🎮 Commands
 
@@ -353,21 +429,16 @@ All commands use the `/product-workflow-` prefix. Short `/pw:` aliases work too.
 ---
 
 
----
 
 
 
----
-
-
----
 
 
 
----
 
 
----
+
+
 
 ## 🖥️ TUI Visual
 
@@ -410,21 +481,16 @@ All commands use the `/product-workflow-` prefix. Short `/pw:` aliases work too.
 ---
 
 
----
 
 
 
----
-
-
----
 
 
 
----
 
 
----
+
+
 
 ## 📋 Skills (16)
 
@@ -471,21 +537,16 @@ All commands use the `/product-workflow-` prefix. Short `/pw:` aliases work too.
 ---
 
 
----
 
 
 
----
-
-
----
 
 
 
----
 
 
----
+
+
 
 ## 🧪 Testing Strategy (Software Products Only)
 
@@ -528,21 +589,16 @@ flaky_rate: > 5% → WARN
 ---
 
 
----
 
 
 
----
-
-
----
 
 
 
----
 
 
----
+
+
 
 ## 📊 Version
 
@@ -553,21 +609,16 @@ flaky_rate: > 5% → WARN
 ---
 
 
----
 
 
 
----
-
-
----
 
 
 
----
 
 
----
+
+
 
 ## License
 
