@@ -224,22 +224,44 @@ pi -e npm:@renatocaliari/pi-product-workflow
  ─────▶  Optional / Conditional (dotted line)
 ```
 
-### Domain Libraries (Tactical Reference)
+┌─────────────────────────────────────────────────────────────┐
+│  🔍 Domain Libraries (auto-detected on triggers)            │
+│     Pricing · Promotions · Ads · Trust · Business Models    │
+│     Health · Marketplace · Open Source                      │
+└─────────────────────────────────────────────────────────────┘
+```
 
-Invoke via `/skill:cali-product-{name}` when relevant during planning/execution.
+### Domain Libraries (Automatic Detection)
+
+The LLM automatically detects domain signals in your request and suggests relevant playbooks.
+
+**Triggers (auto-detected):**
+
+| User says... | Suggests... |
+|---|---|
+| "pricing", "subscription", "how much to charge" | Pricing strategy |
+| "launch", "promotion", "black friday", "coupon" | Promotions framework |
+| "ads", "paid traffic", "facebook ads" | Advertising stages |
+| "trust", "guarantee", "social proof" | Trust building |
+| "business model", "revenue", "monetize" | Business models |
+| "marketplace", "supply/demand" | Marketplace tactics |
+
+**Usage:** Invoke via `/skill:cali-product-{name}` when relevant during planning/execution.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  ┌──────────┐ ┌───────────────┐ ┌─────────┐ ┌────────────┐  │
-│  │   Ads    │ │Business Models│ │ Pricing │ │Promotions │  │
-│  └──────────┘ └───────────────┘ └─────────┘ └────────────┘  │
-│  ┌──────────┐ ┌───────────────┐ ┌─────────┐ ┌────────────┐  │
-│  │  Health  │ │  Marketplace  │ │Open Src │ │Trust Build│  │
-│  └──────────┘ └───────────────┘ └─────────┘ └────────────┘  │
+│  DOMAIN LIBRARIES (auto-detected on user input)              │
+│                                                              │
+│  ┌──────────┐ ┌───────────────┐ ┌─────────┐ ┌────────────┐   │
+│  │   Ads    │ │Business Models│ │ Pricing │ │Promotions │   │
+│  └──────────┘ └───────────────┘ └─────────┘ └────────────┘   │
+│  ┌──────────┐ ┌───────────────┐ ┌─────────┐ ┌────────────┐   │
+│  │  Health  │ │  Marketplace  │ │Open Src │ │Trust Build │   │
+│  └──────────┘ └───────────────┘ └─────────┘ └────────────┘   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-> **Why this matters:** Scope is shaped BEFORE planning, not after. Every plan gets adversarial critique. Gate approval prevents wasted technical work.
+Every plan gets adversarial critique. Gate approval prevents wasted technical work.
 
 
 
