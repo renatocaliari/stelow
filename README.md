@@ -1,11 +1,3 @@
-# @renatocaliari/pi-product-workflow
-
-**Transform product ideas into approved, testable plans — systematically.**
-
-This package brings Shape Up's betting table methodology to pi.dev. Instead of open-ended feature lists, you shape proposals with clear scope boundaries, validate them through adversarial critique, and generate typed technical scopes ready for autonomous execution. Includes 16 specialized product skills (JTBD, Opportunity Mapping, Product Discovery validation, pricing strategies, trust building, and more), a real-time TUI for workflow state, and AI-aware mutation testing strategy for software products.
-
----
-
 ## 📋 Table of Contents
 
 - [🚀 Quick Start](#-quick-start)
@@ -22,7 +14,27 @@ This package brings Shape Up's betting table methodology to pi.dev. Instead of o
 
 ---
 
+
+---
+
+
+
+---
+
+
+---
+
 ## 🚀 Quick Start
+
+---
+
+
+---
+
+
+
+---
+
 
 ---
 
@@ -98,6 +110,16 @@ pi -e npm:@renatocaliari/pi-product-workflow
 
 ---
 
+
+---
+
+
+
+---
+
+
+---
+
 ## 🔧 Dependencies
 
 | Extension | Package | Purpose |
@@ -115,6 +137,16 @@ pi -e npm:@renatocaliari/pi-product-workflow
 
 ---
 
+
+
+---
+
+
+---
+
+
+
+---
 
 
 ---
@@ -141,6 +173,16 @@ pi -e npm:@renatocaliari/pi-product-workflow
 ---
 
 
+
+
+---
+
+
+---
+
+
+
+---
 
 
 ---
@@ -221,19 +263,26 @@ pi -e npm:@renatocaliari/pi-product-workflow
  │  11. Execution ─── Autonomous via /goal                     │
  └─────────────────────────────────────────────────────────────┘
 
- ═════▶  Required flow
- ─────▶  Optional / Conditional (dotted line)
-```
-
 ┌─────────────────────────────────────────────────────────────┐
 │  🔍 Domain Libraries (auto-detected on triggers)           │
 │     Pricing · Promotions · Ads · Trust · Business Models    │
 │     Health · Marketplace · Open Source                      │
 └─────────────────────────────────────────────────────────────┘
+```
 
 ### Domain Libraries (Automatic Detection)
 
-The LLM automatically detects domain signals in your request and suggests relevant playbooks.
+Each domain has its own dedicated skill. The LLM automatically detects signals in your request and suggests relevant playbooks.
+
+**Available Skills:**
+- `/skill:cali-product-pricing` — Pricing strategies
+- `/skill:cali-product-promotions` — Launch framework
+- `/skill:cali-product-ads` — Advertising stages
+- `/skill:cali-product-trust-building` — Trust mechanisms
+- `/skill:cali-product-business-models` — Revenue models
+- `/skill:cali-product-marketplace-playbook` — Supply/demand
+- `/skill:cali-product-health` — Product signals
+- `/skill:cali-product-open-source` — OSS strategy
 
 **Triggers (auto-detected):**
 
@@ -262,6 +311,16 @@ The LLM automatically detects domain signals in your request and suggests releva
 ```
 
 
+
+
+---
+
+
+---
+
+
+
+---
 
 
 ---
@@ -296,6 +355,16 @@ All commands use the `/product-workflow-` prefix. Short `/pw:` aliases work too.
 
 ---
 
+
+
+---
+
+
+---
+
+
+
+---
 
 
 ---
@@ -347,49 +416,12 @@ All commands use the `/product-workflow-` prefix. Short `/pw:` aliases work too.
 
 ---
 
-## 🧪 Testing Strategy (Software Products Only)
-
-When `product_type: software` or `product_type: hybrid`, the workflow auto-activates `cali-testing-ai-code` skill.
-
-### Greenfield (New Code)
-
-| Test Type | Use Case | TDD? |
-|-----------|----------|------|
-| `test-unit` | Business logic, critical paths | ✅ Yes |
-| `test-integration` | DB, APIs, queues | No |
-| `test-security` | Auth, payment, data | No |
-| `test-behavior` | AI agents, multi-step flows | No |
-
-### Brownfield (Existing Code)
-
-| Test Type | Use Case |
-|-----------|----------|
-| `test-regression` | Protect existing functionality |
-| `test-characterization` | Document current behavior (golden tests) |
-| `test-simulation` | Replay past successful tasks |
-| `test-impact` | TDAD-style dependency analysis |
-
-### Mutation Targets
-
-| Path Type | Target | Minimum |
-|-----------|--------|---------|
-| Critical | 70% | 60% |
-| Standard | 50% | 40% |
-| Experimental | 30% | 20% |
-
-### CI/CD Gates
-
-```yaml
-mutation_score: < target → BLOCK
-security_findings: > 0 on critical → BLOCK
-flaky_rate: > 5% → WARN
-```
 
 ---
 
 
----
 
+---
 
 
 ---
@@ -445,6 +477,73 @@ flaky_rate: > 5% → WARN
 
 ---
 
+
+---
+
+
+
+---
+
+
+---
+
+## 🧪 Testing Strategy (Software Products Only)
+
+When `product_type: software` or `product_type: hybrid`, the workflow auto-activates `cali-testing-ai-code` skill.
+
+### Greenfield (New Code)
+
+| Test Type | Use Case | TDD? |
+|-----------|----------|------|
+| `test-unit` | Business logic, critical paths | ✅ Yes |
+| `test-integration` | DB, APIs, queues | No |
+| `test-security` | Auth, payment, data | No |
+| `test-behavior` | AI agents, multi-step flows | No |
+
+### Brownfield (Existing Code)
+
+| Test Type | Use Case |
+|-----------|----------|
+| `test-regression` | Protect existing functionality |
+| `test-characterization` | Document current behavior (golden tests) |
+| `test-simulation` | Replay past successful tasks |
+| `test-impact` | TDAD-style dependency analysis |
+
+### Mutation Targets
+
+| Path Type | Target | Minimum |
+|-----------|--------|---------|
+| Critical | 70% | 60% |
+| Standard | 50% | 40% |
+| Experimental | 30% | 20% |
+
+### CI/CD Gates
+
+```yaml
+mutation_score: < target → BLOCK
+security_findings: > 0 on critical → BLOCK
+flaky_rate: > 5% → WARN
+```
+
+---
+
+
+---
+
+
+
+---
+
+
+---
+
+
+
+---
+
+
+---
+
 ## 📊 Version
 
 **Current**: 0.2.2-alpha
@@ -456,6 +555,16 @@ flaky_rate: > 5% → WARN
 
 ---
 
+
+
+---
+
+
+---
+
+
+
+---
 
 
 ---
