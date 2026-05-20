@@ -92,17 +92,7 @@ Both have a "plan" mode, but it's basic — restrict tools and add generic plann
 - **Domain libraries** — auto-detect from user input (pricing, ads, trust, etc.)
 - **Visual review gate** — Plannotator opens the full plan for point-by-point comments (not just chat)
 
-**Interface exploration comparison:**
 
-| Aspect | Superpowers Brainstorming | pi-product-workflow |
-|--------|---------------------------|---------------------|
-| **Approaches** | 2-3 options | 5 archetypes |
-| **Format** | Text descriptions | ASCII art diagrams |
-| **Trade-offs** | Listed in text | Visual with flows |
-| **Recommendation** | Agent picks best | LLM creates hybrid |
-| **Focus** | Code architecture | User interface |
-
-Superpowers brainstorming: proposes 2-3 approaches in text (200-300 words each), optional "Visual Companion" browser tool for mockups.
 
 This workflow: generates 5 interface archetypes as ASCII art with flows and trade-offs in seconds, then LLM creates a hybrid combining best points for the context.
 
@@ -113,13 +103,23 @@ Both frameworks enforce structure for general software engineering. Here's what 
 | Aspect | [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) | [Superpowers](https://github.com/obra/superpowers) | pi-product-workflow |
 |--------|---|---|
 | **Stars** | ~47K | ~199K | — |
-| **Focus** | Enterprise team simulation (12+ workflows) | TDD-first engineering methodology | Product planning + domain-specific knowledge |
+| **Focus** | Enterprise team simulation (12+ workflows) | TDD-first engineering methodology | Product planning + domain knowledge + execution |
 | **Phases** | 4 (Analysis → Planning → Solutioning → Implementation) | Skills system (14 skills) | 6 (Setup → Strategic → Shape Up → Interface → Critique → Tech) |
 | **Scope Definition** | User stories, epics | Implementation plans | Shape Up with IN/OUT boundaries |
 | **Domain Knowledge** | Generic product workflows | Code patterns, best practices | Job To Be Done, Pricing, Trust, Ads, Open Source, Health, Marketplace |
 | **Review** | Manual or configured checklists | Subagent quality check | Plannotator visual gate with point-by-point comments |
 | **Interface** | 1 UX design workflow (ux-spec.md) | 2-3 text approaches + optional browser | 5 ASCII archetypes + LLM hybrid creation |
 | **Testing** | Sprint-based (dev-story + code-review) | TDD-first with subagents | Context-aware: TDD critical paths, mutation targets (70/50/30%), greenfield/brownfield |
+| **Execution** | Story-by-story sprint cycle | Batch execution with review checkpoints | Typed scopes with dependency mapping and sequencing |
+
+**Interface exploration comparison:**
+
+| Aspect | [Superpowers](https://github.com/obra/superpowers) brainstorming | pi-product-workflow |
+|--------|---|---|
+| **Approaches** | 2-3 options | 5 archetypes |
+| **Format** | Text descriptions (200-300 words each) | ASCII art with flows and trade-offs |
+| **Visual** | Optional browser companion for mockups | Built-in ASCII art generation |
+| **Recommendation** | Agent picks best option | LLM creates hybrid combining best points |
 
 **Key differentiators:**
 
