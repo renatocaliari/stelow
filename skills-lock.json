@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "cali-product-workflow": {
+      "source": "renatocaliari/pi-product-workflow",
+      "sourceType": "github",
+      "skillPath": "skills/cali-product-workflow/SKILL.md",
+      "computedHash": "efc23d15cbf97bbc82709917410f7521fc9e254dc9a53ff9c1478e22abe11472"
+    }
+  }
+}
