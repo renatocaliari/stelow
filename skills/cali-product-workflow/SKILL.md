@@ -1,24 +1,15 @@
 ---
 name: cali-product-workflow
 description: >
-  [Cali] Complete product strategic planning orchestrator. Executes Shape Up Planning,
-  Interface Brainstorming (conditional), Tech Planning Sequencing, Solution Critique,
-  and Plannotator Gate. Use to transform an idea into an approved plan ready for execution.
-  
-  Trigger keywords: product planning, shape up, spec product, planning workflow, 
-  idea to execution, roadmap planning, feature planning
-  
-  Sub-skills (4 workflow phases):
-  - /skill:cali-shape-up — Shape Up planning
-  - /skill:cali-interface-brainstorm — Interface brainstorming
-  - /skill:cali-plan-critique — Plan critique
-  - /skill:cali-tech-planning — Tech planning
-  - /skill:cali-testing-ai-code — AI-aware testing strategy (software products only)
-  
-  Standalone loading: skills-workflow/cali-{name}/SKILL.md
-  
-  External skills: JTBD, Evolutionary, Opportunity Mapping, Product Discovery, Ads, Business Models,
-  Health, Marketplace, Open Source, Pricing, Promotions, Trust Building
+  [Cali] Product strategic planning orchestrator. Transforms ideas into approved,
+  testable plans through 11 structured phases: Setup → Context → Shape → Critique
+  → Gate → Scope → Interface → Int.Gate → Selection → Planning → Execution.
+
+  Standalone: works with any CLI (pi, opencode, claude code, codex) or can run
+  individual phases via sub-skills.
+
+  Trigger keywords: /pw-start, /pw-menu, product planning, idea to execution,
+  shape up, feature planning, planning workflow, roadmap
 ---
 
 # Product Planner (Orchestrator)
